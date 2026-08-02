@@ -1,6 +1,11 @@
 name = "zhongjin-shujie-wedding"
 compatibility_date = "2026-08-02"
-pages_build_output_dir = "."
+main = "src/index.js"
+
+[assets]
+directory = "."
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
 
 [[d1_databases]]
 binding = "WEDDING_DB"

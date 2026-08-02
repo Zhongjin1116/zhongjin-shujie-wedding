@@ -48,20 +48,27 @@ wrangler d1 execute wedding-rsvp --remote --file=./schema.sql
 
 ### 4. 把数据库绑定到 Pages 项目
 
-项目里已经添加 `wrangler.toml`，用于把 D1 绑定到 Pages Function：
+项目里已经添加 `wrangler.toml`，用于把 D1 绑定到 Cloudflare Worker：
 
 ```toml
+main = "src/index.js"
+
+[assets]
+directory = "."
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
 [[d1_databases]]
 binding = "WEDDING_DB"
 database_name = "wedding-rsvp"
 database_id = "b139a2d6-eb06-49cd-8444-6de092f773f8"
 ```
 
-Cloudflare Pages 的 Build 设置保持：
+如果 Cloudflare 要求填写部署命令，使用：
 
-- Framework preset: `None`
-- Build command: 留空
-- Build output directory: `/`
+```bash
+npx wrangler deploy
+```
 
 保存后，触发一次重新部署（Deployments → Retry deployment）使绑定生效。
 
