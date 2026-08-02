@@ -20,8 +20,13 @@ schema.sql            数据库表结构
 1. 登录 [dash.cloudflare.com](https://dash.cloudflare.com)
 2. 左侧菜单 → **Workers & Pages** → **创建** → **Pages** → **连接到 Git**
 3. 选择 `zhongjin-shujie-wedding` 这个 repo
-4. Build 设置全部留空（这是纯静态站点，不需要 build 命令）
+4. Build 设置：
+   - Framework preset: `None`
+   - Build command: 留空
+   - Build output directory: `/`
 5. 点击部署，几分钟后你会拿到一个 `xxx.pages.dev` 的免费链接
+
+> 注意：直接用本地静态服务器打开页面时，首页和回执页可以预览；但提交回执需要 Cloudflare Pages Functions 和 D1 绑定，不能只靠 `python -m http.server` 完整测试。
 
 ### 3. 创建 D1 数据库
 

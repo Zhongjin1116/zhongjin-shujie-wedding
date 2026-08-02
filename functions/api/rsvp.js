@@ -8,6 +8,13 @@
 export async function onRequestPost(context) {
   const { request, env } = context;
 
+  if (!env.WEDDING_DB) {
+    return new Response(JSON.stringify({ error: 'WEDDING_DB binding is not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   let body;
   try {
     body = await request.json();
@@ -57,6 +64,21 @@ export async function onRequestPost(context) {
 // Simple GET for you to view all responses in a browser (basic — no auth, see README to add a secret key)
 export async function onRequestGet(context) {
   const { env, request } = context;
+
+  if (!env.WEDDING_DB) {
+    return new Response(JSON.stringify({ error: 'WEDDING_DB binding is not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (!env.RSVP_VIEW_KEY) {
+    return new Response(JSON.stringify({ error: 'RSVP_VIEW_KEY is not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const url = new URL(request.url);
   const key = url.searchParams.get('key');
 

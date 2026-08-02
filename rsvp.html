@@ -131,12 +131,17 @@
       btn.textContent = '提交中...';
       btn.disabled = true;
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
       try {
         const res = await fetch('/api/rsvp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, attending, guestCount, dietary: dietary.join(','), message })
+          body: JSON.stringify({ name, attending, guestCount, dietary: dietary.join(','), message }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           document.getElementById('form-container').style.display = 'none';
@@ -145,6 +150,7 @@
           throw new Error('提交失败');
         }
       } catch (e) {
+        clearTimeout(timeoutId);
         errorMsg.textContent = '提交遇到问题，请稍后再试。';
         btn.textContent = '提交回执';
         btn.disabled = false;
