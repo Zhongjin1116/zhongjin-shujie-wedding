@@ -147,11 +147,18 @@
           document.getElementById('form-container').style.display = 'none';
           document.getElementById('success-container').style.display = 'block';
         } else {
-          throw new Error('提交失败');
+          let errorDetail = '提交失败';
+          try {
+            const data = await res.json();
+            errorDetail = data.detail || data.error || errorDetail;
+          } catch (_) {}
+          throw new Error(errorDetail);
         }
       } catch (e) {
         clearTimeout(timeoutId);
-        errorMsg.textContent = '提交遇到问题，请稍后再试。';
+        errorMsg.textContent = e.name === 'AbortError'
+          ? '提交超时，请稍后再试。'
+          : `提交遇到问题：${e.message}`;
         btn.textContent = '提交回执';
         btn.disabled = false;
       }
