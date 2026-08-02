@@ -48,24 +48,6 @@ wrangler d1 execute wedding-rsvp --remote --file=./schema.sql
 
 ### 4. 把数据库绑定到 Pages 项目
 
-如果 Cloudflare Dashboard 无法添加 D1 binding，项目里的 `wrangler.json` 会绑定 D1：
-
-```json
-{
-  "binding": "WEDDING_DB",
-  "database_name": "wedding-rsvp",
-  "database_id": "b139a2d6-eb06-49cd-8444-6de092f773f8"
-}
-```
-
-Cloudflare Pages 的 Build 设置仍然要保持：
-
-- Framework preset: `None`
-- Build command: 留空
-- Build output directory: `/`
-
-如果你可以在 Dashboard 里添加 binding，也可以用 Dashboard 方式：
-
 1. Cloudflare Dashboard → 你的 Pages 项目 → **Settings** → **Bindings**
 2. 添加 **D1 database**
 3. **Variable name** 填：`WEDDING_DB`
