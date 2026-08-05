@@ -62,41 +62,11 @@ a { color: inherit; text-decoration: none; }
   z-index: 1;
 }
 
-.hero-eyebrow {
-  font-family: var(--font-body);
-  font-size: 13px;
-  letter-spacing: 0.3em;
-  color: rgba(250, 249, 246, 0.82);
-  margin-bottom: 28px;
-}
-
-.hero-names {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 32px;
-}
-
-.name-en {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 300;
-  font-size: clamp(36px, 8vw, 64px);
-  letter-spacing: 0.01em;
-}
-
-.amp {
-  color: rgba(250, 249, 246, 0.78);
-  padding: 0 6px;
-}
-
-.name-zh {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(18px, 3vw, 22px);
-  letter-spacing: 0.4em;
-  color: rgba(250, 249, 246, 0.82);
-  padding-left: 0.4em; /* optical correction for letter-spacing */
+.hero-mark {
+  display: block;
+  width: min(76vw, 568px);
+  height: auto;
+  margin: 0 auto 36px;
 }
 
 .hero-date {
