@@ -27,4 +27,22 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('.media-section')?.scrollIntoView({ behavior: 'smooth' });
     });
   }
+
+  // Hero background video parallax depth effect (pointer-driven, desktop only)
+  const hero = document.querySelector('.hero');
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (hero && canHover && !reducedMotion) {
+    hero.addEventListener('mousemove', (e) => {
+      const rect = hero.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) / rect.width - 0.5;
+      const my = (e.clientY - rect.top) / rect.height - 0.5;
+      hero.style.setProperty('--mx', (mx * 2).toFixed(3));
+      hero.style.setProperty('--my', (my * 2).toFixed(3));
+    });
+    hero.addEventListener('mouseleave', () => {
+      hero.style.setProperty('--mx', 0);
+      hero.style.setProperty('--my', 0);
+    });
+  }
 });
