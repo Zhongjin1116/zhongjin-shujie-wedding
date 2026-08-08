@@ -539,4 +539,59 @@ a { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .hero-inner, .success-container { animation: none; }
   .scroll-hint { animation: none; }
+  .bgm-toggle::before { animation: none; }
 }
+
+/* ---------- Background music toggle ---------- */
+.bgm-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 50;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bgm-toggle:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.bgm-toggle::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid var(--ink);
+  opacity: 0;
+}
+
+.bgm-toggle.is-playing::before {
+  opacity: 0.35;
+  animation: bgm-pulse 2s ease-out infinite;
+}
+
+@keyframes bgm-pulse {
+  0% { transform: scale(0.9); opacity: 0.35; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.bgm-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.bgm-icon-pause { display: none; }
+.bgm-toggle.is-playing .bgm-icon-play { display: none; }
+.bgm-toggle.is-playing .bgm-icon-pause { display: block; }

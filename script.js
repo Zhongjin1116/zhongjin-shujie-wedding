@@ -45,4 +45,31 @@ document.addEventListener('DOMContentLoaded', () => {
       hero.style.setProperty('--my', 0);
     });
   }
+
+  // Background music toggle
+  const bgm = document.getElementById('bgm');
+  const bgmToggle = document.getElementById('bgm-toggle');
+  if (bgm && bgmToggle) {
+    bgm.volume = 0.5;
+
+    bgmToggle.addEventListener('click', () => {
+      if (bgm.paused) {
+        bgm.play().catch(() => {});
+      } else {
+        bgm.pause();
+      }
+    });
+
+    bgm.addEventListener('play', () => {
+      bgmToggle.classList.add('is-playing');
+      bgmToggle.setAttribute('aria-pressed', 'true');
+      bgmToggle.setAttribute('aria-label', '暂停背景音乐');
+    });
+
+    bgm.addEventListener('pause', () => {
+      bgmToggle.classList.remove('is-playing');
+      bgmToggle.setAttribute('aria-pressed', 'false');
+      bgmToggle.setAttribute('aria-label', '播放背景音乐');
+    });
+  }
 });
