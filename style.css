@@ -189,13 +189,11 @@ a { color: inherit; text-decoration: none; }
 
 .page1-title span {
   display: block;
-  width: 0;
-  max-width: max-content;
-  overflow: hidden;
-  padding-right: 0.24ch;
+  width: max-content;
+  overflow: visible;
   white-space: nowrap;
   border-right: 2px solid transparent;
-  box-sizing: content-box;
+  clip-path: inset(0 100% 0 0);
 }
 
 .page1-title span:nth-child(1) {
@@ -217,15 +215,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 @keyframes type-shujie {
-  to { width: 6.9ch; }
+  to { clip-path: inset(0 -0.3ch 0 0); }
 }
 
 @keyframes type-and {
-  to { width: 3.9ch; }
+  to { clip-path: inset(0 -0.3ch 0 0); }
 }
 
 @keyframes type-zhongjin {
-  to { width: 9.3ch; }
+  to { clip-path: inset(0 -0.3ch 0 0); }
 }
 
 @keyframes type-caret {
@@ -257,7 +255,7 @@ a { color: inherit; text-decoration: none; }
   }
 
   .page1-title span {
-    width: auto;
+    clip-path: none;
   }
 }
 
