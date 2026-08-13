@@ -173,7 +173,7 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   left: 17.73%;
   top: 32.39%;
-  width: 32.27%;
+  width: 42%;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -184,6 +184,7 @@ a { color: inherit; text-decoration: none; }
   line-height: 1;
   text-align: left;
   word-break: break-word;
+  overflow: visible;
 }
 
 .page1-title span {
@@ -191,8 +192,10 @@ a { color: inherit; text-decoration: none; }
   width: 0;
   max-width: max-content;
   overflow: hidden;
+  padding-right: 0.24ch;
   white-space: nowrap;
   border-right: 2px solid transparent;
+  box-sizing: content-box;
 }
 
 .page1-title span:nth-child(1) {
@@ -214,15 +217,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 @keyframes type-shujie {
-  to { width: 6.45ch; }
+  to { width: 6.9ch; }
 }
 
 @keyframes type-and {
-  to { width: 3.35ch; }
+  to { width: 3.9ch; }
 }
 
 @keyframes type-zhongjin {
-  to { width: 8.65ch; }
+  to { width: 9.3ch; }
 }
 
 @keyframes type-caret {
@@ -235,13 +238,13 @@ a { color: inherit; text-decoration: none; }
     transform: rotate(var(--r)) scaleX(var(--sx)) scaleY(var(--sy));
   }
   22% {
-    transform: rotate(calc(var(--r) - 4deg)) scale(1.02) scaleX(var(--sx)) scaleY(var(--sy));
+    transform: translateY(-1px) rotate(calc(var(--r) - 2deg)) scaleX(var(--sx)) scaleY(var(--sy));
   }
   48% {
-    transform: rotate(calc(var(--r) + 3deg)) scale(0.99) scaleX(var(--sx)) scaleY(var(--sy));
+    transform: translateY(1px) rotate(calc(var(--r) + 1.5deg)) scaleX(var(--sx)) scaleY(var(--sy));
   }
   72% {
-    transform: rotate(calc(var(--r) - 1.5deg)) scale(1.01) scaleX(var(--sx)) scaleY(var(--sy));
+    transform: translateY(-0.5px) rotate(calc(var(--r) - 0.8deg)) scaleX(var(--sx)) scaleY(var(--sy));
   }
 }
 
