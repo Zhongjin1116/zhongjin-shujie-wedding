@@ -7,5 +7,3 @@ src
 README.md
 schema.sql
 wrangler.toml
-assets/background.MP4
-assets/background_video.mov
