@@ -276,12 +276,22 @@ a { color: inherit; text-decoration: none; }
   background: #f6f6f4;
 }
 
+.figma-frame,
 .figma-scene {
   position: relative;
   width: max(100vw, calc(100svh * 375 / 812));
   aspect-ratio: 375 / 812;
-  overflow: visible;
   flex: 0 0 auto;
+}
+
+.figma-frame {
+  overflow: visible;
+}
+
+.figma-scene {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   background: #f5f4f0;
   isolation: isolate;
 }
@@ -301,10 +311,15 @@ a { color: inherit; text-decoration: none; }
   z-index: 1;
 }
 
-.figma-scene img {
+.figma-scene img,
+.figma-bleed {
   display: block;
   pointer-events: none;
   user-select: none;
+}
+
+.figma-bleed {
+  z-index: 2;
 }
 
 .figma-bg {
