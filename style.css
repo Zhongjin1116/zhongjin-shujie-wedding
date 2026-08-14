@@ -339,7 +339,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page2-scene {
-  --page-bg: url("assets/figma/page2/background.png");
+  --page-bg: url("assets/figma/page2/background.jpg");
 }
 
 .page2-from {
@@ -516,7 +516,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page4-scene {
-  --page-bg: url("assets/figma/page4/background.png");
+  --page-bg: url("assets/figma/page4/background.jpg");
   color: #4a4c4d;
 }
 
