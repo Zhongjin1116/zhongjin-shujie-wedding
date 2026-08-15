@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const page2Video = document.querySelector('.page2-video');
   const page3Scene = document.querySelector('.page3-scene');
   const page3Photo = document.querySelector('.page3-photo');
+  const page3PhotoNext = document.querySelector('.page3-photo-next');
   const page3Count = document.querySelector('.page3-count');
 
   if (page1Scene) {
@@ -71,32 +72,67 @@ document.addEventListener('DOMContentLoaded', () => {
     videoObserver.observe(page2Scene);
   }
 
-  if (page3Scene && page3Photo && page3Count) {
+  if (page3Scene && page3Photo && page3PhotoNext && page3Count) {
     const page3Images = Array.from({ length: 8 }, (_, index) => `assets/figma/page3/image${index + 1}.jpg`);
     let page3Index = 0;
     let slideshowTimer = null;
+    let isTransitioning = false;
 
-    page3Images.slice(1).forEach((src) => {
+    const preloaders = page3Images.map((src) => {
       const image = new Image();
       image.src = src;
+      return image;
     });
 
-    const renderSlide = (nextIndex) => {
-      page3Index = nextIndex;
-      page3Photo.classList.add('is-changing');
+    const waitForImage = async (image) => {
+      if (image.complete && image.naturalWidth > 0) return;
+      if (image.decode) {
+        try {
+          await image.decode();
+          return;
+        } catch (_) {}
+      }
+
+      await new Promise((resolve) => {
+        image.addEventListener('load', resolve, { once: true });
+        image.addEventListener('error', resolve, { once: true });
+      });
+    };
+
+    const renderSlide = async (nextIndex) => {
+      if (isTransitioning) return;
+      isTransitioning = true;
+
+      const nextImage = preloaders[nextIndex];
+      await waitForImage(nextImage);
+      if (!nextImage.naturalWidth) {
+        isTransitioning = false;
+        return;
+      }
+
+      page3PhotoNext.src = page3Images[nextIndex];
+      page3PhotoNext.classList.remove('is-visible');
+      page3PhotoNext.offsetHeight;
+      page3Count.classList.add('is-changing');
+      page3Photo.classList.add('is-fading');
+      page3PhotoNext.classList.add('is-visible');
 
       window.setTimeout(() => {
+        page3Index = nextIndex;
         page3Photo.src = page3Images[page3Index];
         page3Count.textContent = `${page3Index + 1}/8`;
-        page3Photo.classList.remove('is-changing');
-      }, 220);
+        page3Photo.classList.remove('is-fading');
+        page3PhotoNext.classList.remove('is-visible');
+        page3Count.classList.remove('is-changing');
+        isTransitioning = false;
+      }, 950);
     };
 
     const startSlideshow = () => {
       if (slideshowTimer) return;
       slideshowTimer = window.setInterval(() => {
         renderSlide((page3Index + 1) % page3Images.length);
-      }, 2600);
+      }, 5200);
     };
 
     const stopSlideshow = () => {
