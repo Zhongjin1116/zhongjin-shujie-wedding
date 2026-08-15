@@ -6,6 +6,47 @@ document.addEventListener('DOMContentLoaded', () => {
   const page3Photo = document.querySelector('.page3-photo');
   const page3PhotoNext = document.querySelector('.page3-photo-next');
   const page3Count = document.querySelector('.page3-count');
+  const backgroundMusic = document.getElementById('background-music');
+  const musicToggle = document.querySelector('.music-toggle');
+
+  if (backgroundMusic && musicToggle) {
+    const setMusicState = (isPlaying) => {
+      musicToggle.setAttribute('aria-pressed', String(isPlaying));
+      musicToggle.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
+      musicToggle.textContent = isPlaying ? 'Pause' : 'Music';
+    };
+
+    const playMusic = async () => {
+      try {
+        await backgroundMusic.play();
+        setMusicState(true);
+        return true;
+      } catch (_) {
+        setMusicState(false);
+        return false;
+      }
+    };
+
+    musicToggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (backgroundMusic.paused) {
+        playMusic();
+      } else {
+        backgroundMusic.pause();
+        setMusicState(false);
+      }
+    });
+
+    const startMusicAfterInteraction = (event) => {
+      if (event.target?.closest?.('.music-toggle')) return;
+      playMusic();
+      document.removeEventListener('pointerdown', startMusicAfterInteraction);
+      document.removeEventListener('keydown', startMusicAfterInteraction);
+    };
+
+    document.addEventListener('pointerdown', startMusicAfterInteraction);
+    document.addEventListener('keydown', startMusicAfterInteraction);
+  }
 
   if (page1Scene) {
     const triggerSticker = (sticker) => {
