@@ -247,6 +247,12 @@ a { color: inherit; text-decoration: none; }
   animation-play-state: running;
 }
 
+.page1-scene.is-page1-settled:not(.is-exiting-to-page2):not(.is-page2):not(.is-returning-to-page1) .page1-sticker {
+  opacity: 1;
+  animation: none;
+  transform: translate(0, 0) scale(1);
+}
+
 .page1-fog-canvas {
   position: absolute;
   inset: 0;

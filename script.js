@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fogTextureCanvas = document.createElement('canvas');
       const fogTextureCtx = fogTextureCanvas.getContext('2d', { alpha: true });
       if (!ctx || !maskCtx || !fogTextureCtx) {
-        page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready');
+        page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-page1-settled');
         document.body.classList.remove('is-fog-locked');
       }
       let dpr = 1;
@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
           page1Scene.classList.add('is-fog-cleared', 'is-revealed');
           document.body.classList.remove('is-fog-locked');
           window.setTimeout(() => {
-            page1Scene.classList.add('is-motion-ready');
+            page1Scene.classList.add('is-motion-ready', 'is-page1-settled');
             playBackgroundMusic({ restart: true });
           }, 1250);
         };
@@ -478,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hasStartedReveal = false;
         dissolveOrigins.length = 0;
         revealedCells.clear();
-        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-exiting-to-page2', 'is-page2');
+        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-page1-settled', 'is-exiting-to-page2', 'is-page2', 'is-returning-to-page1');
         document.body.classList.add('is-fog-locked');
         resizeFog();
       };
