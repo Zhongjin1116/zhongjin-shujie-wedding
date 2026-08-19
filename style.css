@@ -203,7 +203,7 @@ a { color: inherit; text-decoration: none; }
   --exit-y: -18vh;
   --r: 79.72deg;
   --delay: 0s;
-  left: -4.8%;
+  left: -8.2%;
   top: 23.89%;
   width: 30.96%;
   height: 13.13%;
@@ -247,8 +247,8 @@ a { color: inherit; text-decoration: none; }
   --delay: 0s;
   left: auto;
   top: auto;
-  right: 19.73%;
-  bottom: 70.94%;
+  right: 15.6%;
+  bottom: 71.8%;
   width: 12.4%;
   height: 5.42%;
 }
@@ -734,9 +734,9 @@ a { color: inherit; text-decoration: none; }
 
 .page3-inline {
   --page3-index: 0;
-  --page3-card-width: min(80vw, calc(var(--app-height) * 300 / 812));
+  --page3-card-width: min(86vw, calc(var(--app-height) * 322 / 812));
   --page3-card-height: calc(var(--page3-card-width) * 4 / 3);
-  --page3-slide-step: min(80vw, calc(var(--app-height) * 300 / 812));
+  --page3-slide-step: min(86vw, calc(var(--app-height) * 322 / 812));
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -842,8 +842,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page3-rsvp-cat {
-  left: 7.7%;
-  top: 44.6%;
+  left: 5.7%;
+  top: 59.4%;
   z-index: 3;
   width: 27.4%;
   height: 22.4%;
