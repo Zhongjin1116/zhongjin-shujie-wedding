@@ -142,13 +142,25 @@ a { color: inherit; text-decoration: none; }
 
 .page1-scene.is-exiting-to-page2 .page1-strawberry-left,
 .page1-scene.is-exiting-to-page2 .page1-deer,
-.page1-scene.is-exiting-to-page2 .page1-butterfly-center {
+.page1-scene.is-exiting-to-page2 .page1-butterfly-center,
+.page1-scene.is-page2 .page1-strawberry-left,
+.page1-scene.is-page2 .page1-deer,
+.page1-scene.is-page2 .page1-butterfly-center {
   animation: page1-extra-sticker-exit 0.78s cubic-bezier(0.6, 0, 0.4, 1) forwards;
+}
+
+.page1-scene.is-exiting-to-page2 .page1-title,
+.page1-scene.is-page2 .page1-title {
+  opacity: 0;
+  transition: opacity 0.45s ease;
 }
 
 .page1-scene.is-exiting-to-page2 .page1-strawberry-left img,
 .page1-scene.is-exiting-to-page2 .page1-deer img,
-.page1-scene.is-exiting-to-page2 .page1-butterfly-center img {
+.page1-scene.is-exiting-to-page2 .page1-butterfly-center img,
+.page1-scene.is-page2 .page1-strawberry-left img,
+.page1-scene.is-page2 .page1-deer img,
+.page1-scene.is-page2 .page1-butterfly-center img {
   animation: none;
 }
 
@@ -264,7 +276,7 @@ a { color: inherit; text-decoration: none; }
   transition: opacity 0.35s ease;
 }
 
-.page1-scene.is-motion-ready .page1-controls {
+.page1-scene.is-motion-ready:not(.is-page2) .page1-controls {
   opacity: 1;
   pointer-events: auto;
 }
@@ -509,6 +521,13 @@ a { color: inherit; text-decoration: none; }
   aspect-ratio: auto;
 }
 
+.page2-inline {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
 .page2-scene {
   color: #fff;
   letter-spacing: 0.1em;
@@ -536,10 +555,12 @@ a { color: inherit; text-decoration: none; }
   left: 39.73%;
   top: 19.46%;
   z-index: 2;
+  opacity: 0;
   font-size: 12px;
   line-height: 1;
   text-align: right;
   white-space: nowrap;
+  transition: opacity 0.35s ease 0.35s;
 }
 
 .page2-camera {
@@ -589,6 +610,7 @@ a { color: inherit; text-decoration: none; }
   left: 50%;
   top: 66.07%;
   z-index: 2;
+  opacity: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -598,6 +620,7 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
   white-space: nowrap;
   transform: translateX(-50%);
+  transition: opacity 0.35s ease 0.45s;
 }
 
 .page2-locations span {
@@ -648,6 +671,19 @@ a { color: inherit; text-decoration: none; }
 
 .page2-controls {
   z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease 0.55s;
+}
+
+.page2-scene.is-active .page2-from,
+.page2-scene.is-active .page2-locations,
+.page2-scene.is-active .page2-controls {
+  opacity: 1;
+}
+
+.page2-scene.is-active .page2-controls {
+  pointer-events: auto;
 }
 
 .page3-scene {

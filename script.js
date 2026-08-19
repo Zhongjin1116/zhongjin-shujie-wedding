@@ -82,22 +82,27 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseBackgroundMusic();
         musicWasManuallyPaused = false;
         setMusicState(false);
+        if (page2Scene && page2Video) {
+          page2Video.pause();
+          page2Video.currentTime = 0;
+          page2Scene.classList.remove('is-active', 'is-motion-ready');
+          page2Scene.setAttribute('aria-hidden', 'true');
+        }
         resetPageOneFog?.();
         return;
       }
 
       if (action === 'next') {
         const target = button.dataset.target ? document.querySelector(button.dataset.target) : null;
-        const isPageOneNext = target?.id === 'page2' && page1Scene;
+        const isPageOneNext = target?.id === 'page2-inline' && page1Scene;
 
         if (isPageOneNext) {
+          musicWasManuallyPaused = false;
+          playBackgroundMusic({ userInitiated: true });
           page1Scene.classList.add('is-exiting-to-page2');
           window.setTimeout(() => {
-            document.body.classList.remove('page-one-only', 'is-fog-locked');
+            page1Scene.classList.add('is-page2');
             activatePage2?.();
-            window.requestAnimationFrame(() => {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
           }, 620);
           return;
         }
@@ -416,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hasStartedReveal = false;
         dissolveOrigins.length = 0;
         revealedCells.clear();
-        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-exiting-to-page2');
+        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-exiting-to-page2', 'is-page2');
         document.body.classList.add('is-fog-locked');
         resizeFog();
       };
@@ -559,17 +564,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const videoSrc = page2Video.dataset.src;
       if (!videoSrc) return false;
 
-      try {
-        const response = await fetch(videoSrc, { method: 'HEAD' });
-        if (!response.ok) {
-          page2Video.dataset.ready = 'false';
-          return false;
-        }
-      } catch (_) {
-        page2Video.dataset.ready = 'false';
-        return false;
-      }
-
       const source = document.createElement('source');
       source.src = videoSrc;
       source.type = 'video/mp4';
@@ -582,6 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
     activatePage2 = () => {
       page2Scene.classList.remove('is-motion-ready');
       page2Scene.classList.add('is-active');
+      page2Scene.setAttribute('aria-hidden', 'false');
       loadPage2Video().then((isReady) => {
         if (isReady) page2Video.play().catch(() => {});
       });
@@ -589,19 +584,6 @@ document.addEventListener('DOMContentLoaded', () => {
         page2Scene.classList.add('is-motion-ready');
       }, 950);
     };
-
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          activatePage2?.();
-        } else {
-          page2Video.pause();
-          page2Scene.classList.remove('is-active', 'is-motion-ready');
-        }
-      });
-    }, { threshold: 0.55 });
-
-    videoObserver.observe(page2Scene);
   }
 
   if (page3Scene && page3Photo && page3PhotoNext && page3Count) {

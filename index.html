@@ -35,27 +35,7 @@
       <div class="page1-sticker page1-butterfly-center">
         <img src="assets/figma/page1/img-6086.png" alt="" aria-hidden="true" />
       </div>
-      <div class="page-controls page1-controls" data-node-id="548:372" aria-label="Page controls">
-        <button class="page-control page-control-back" type="button" aria-label="Back to fog" data-control-action="fog">
-          <img src="assets/figma/page1/controls/chevron-left.svg" alt="" aria-hidden="true" />
-        </button>
-        <button class="page-control music-toggle" type="button" aria-label="Play background music" aria-pressed="false">
-          <span class="music-toggle-icon" aria-hidden="true">
-            <img src="assets/figma/page1/controls/music.svg" alt="" />
-          </span>
-        </button>
-        <button class="page-control page-control-next" type="button" aria-label="Next page" data-control-action="next" data-target="#page2">
-          <img src="assets/figma/page1/controls/chevron-right.svg" alt="" aria-hidden="true" />
-        </button>
-      </div>
-      <canvas class="page1-fog-canvas" aria-hidden="true"></canvas>
-    </div>
-  </section>
-
-  <section class="figma-section" id="page2" aria-label="From 2017">
-    <div class="figma-frame page2-frame">
-      <div class="figma-scene page2-scene" data-node-id="510:574">
-        <img class="page2-bg" src="assets/figma/page1/background.png" alt="" aria-hidden="true" />
+      <div class="page2-scene page2-inline" id="page2-inline" data-node-id="510:574" aria-hidden="true">
         <p class="page2-from figma-type">From 2017</p>
         <div class="page2-camera" data-node-id="548:54">
           <video class="page2-video" muted playsinline loop preload="metadata" data-src="assets/figma/page2/video.mp4" aria-hidden="true"></video>
@@ -67,12 +47,6 @@
           <span>Michigan</span>
           <span>California</span>
           <span>Seattle</span>
-        </div>
-        <div class="page2-sticker page2-butterfly-left" data-node-id="517:1324">
-          <img src="assets/figma/page1/img-6086.png" alt="" aria-hidden="true" />
-        </div>
-        <div class="page2-sticker page2-strawberry-top" data-node-id="527:1486">
-          <img src="assets/figma/page1/subject-1.png" alt="" aria-hidden="true" />
         </div>
         <div class="page-controls page2-controls" data-node-id="548:359" aria-label="Page controls">
           <button class="page-control page-control-back" type="button" aria-label="Back to fog" data-control-action="fog">
@@ -88,6 +62,20 @@
           </button>
         </div>
       </div>
+      <div class="page-controls page1-controls" data-node-id="548:372" aria-label="Page controls">
+        <button class="page-control page-control-back" type="button" aria-label="Back to fog" data-control-action="fog">
+          <img src="assets/figma/page1/controls/chevron-left.svg" alt="" aria-hidden="true" />
+        </button>
+        <button class="page-control music-toggle" type="button" aria-label="Play background music" aria-pressed="false">
+          <span class="music-toggle-icon" aria-hidden="true">
+            <img src="assets/figma/page1/controls/music.svg" alt="" />
+          </span>
+        </button>
+        <button class="page-control page-control-next" type="button" aria-label="Next page" data-control-action="next" data-target="#page2-inline">
+          <img src="assets/figma/page1/controls/chevron-right.svg" alt="" aria-hidden="true" />
+        </button>
+      </div>
+      <canvas class="page1-fog-canvas" aria-hidden="true"></canvas>
     </div>
   </section>
 
