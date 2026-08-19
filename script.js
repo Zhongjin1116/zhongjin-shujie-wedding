@@ -25,44 +25,73 @@ document.addEventListener('DOMContentLoaded', () => {
   const page3Count = document.querySelector('.page3-count');
   const backgroundMusic = document.getElementById('background-music');
   const musicToggle = document.querySelector('.music-toggle');
+  const pageBackButton = document.querySelector('.page-control-back');
+  const pageNextButton = document.querySelector('.page-control-next');
+  const firstFigmaSection = document.querySelector('.figma-section');
+  let resetPageOneFog = null;
+  let musicWasManuallyPaused = false;
+
+  const setMusicState = (isPlaying) => {
+    if (!musicToggle) return;
+
+    musicToggle.setAttribute('aria-pressed', String(isPlaying));
+    musicToggle.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
+    musicToggle.classList.toggle('is-user-paused', !isPlaying && musicWasManuallyPaused);
+  };
+
+  const playBackgroundMusic = async ({ userInitiated = false } = {}) => {
+    if (!backgroundMusic || !musicToggle) return false;
+    if (musicWasManuallyPaused && !userInitiated) return false;
+
+    try {
+      await backgroundMusic.play();
+      setMusicState(true);
+      return true;
+    } catch (_) {
+      setMusicState(false);
+      return false;
+    }
+  };
+
+  const pauseBackgroundMusic = ({ userInitiated = false } = {}) => {
+    if (!backgroundMusic) return;
+    if (userInitiated) musicWasManuallyPaused = true;
+    backgroundMusic.pause();
+    setMusicState(false);
+  };
 
   if (backgroundMusic && musicToggle) {
-    const setMusicState = (isPlaying) => {
-      musicToggle.setAttribute('aria-pressed', String(isPlaying));
-      musicToggle.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
-      musicToggle.textContent = isPlaying ? 'Pause' : 'Music';
-    };
-
-    const playMusic = async () => {
-      try {
-        await backgroundMusic.play();
-        setMusicState(true);
-        return true;
-      } catch (_) {
-        setMusicState(false);
-        return false;
-      }
-    };
-
     musicToggle.addEventListener('click', (event) => {
       event.stopPropagation();
       if (backgroundMusic.paused) {
-        playMusic();
+        musicWasManuallyPaused = false;
+        playBackgroundMusic({ userInitiated: true });
       } else {
-        backgroundMusic.pause();
-        setMusicState(false);
+        pauseBackgroundMusic({ userInitiated: true });
       }
     });
+  }
 
-    const startMusicAfterInteraction = (event) => {
-      if (event.target?.closest?.('.music-toggle')) return;
-      playMusic();
-      document.removeEventListener('pointerdown', startMusicAfterInteraction);
-      document.removeEventListener('keydown', startMusicAfterInteraction);
-    };
+  if (pageBackButton) {
+    pageBackButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.body.classList.add('page-one-only');
+      pauseBackgroundMusic();
+      musicWasManuallyPaused = false;
+      setMusicState(false);
+      resetPageOneFog?.();
+    });
+  }
 
-    document.addEventListener('pointerdown', startMusicAfterInteraction);
-    document.addEventListener('keydown', startMusicAfterInteraction);
+  if (pageNextButton) {
+    pageNextButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      document.body.classList.remove('page-one-only', 'is-fog-locked');
+      window.requestAnimationFrame(() => {
+        firstFigmaSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
   }
 
   if (page1Scene) {
@@ -255,6 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
           page1Scene.classList.remove('is-fog-dissolving');
           page1Scene.classList.add('is-fog-cleared', 'is-revealed');
           document.body.classList.remove('is-fog-locked');
+          playBackgroundMusic();
           window.setTimeout(() => {
             page1Scene.classList.add('is-motion-ready');
           }, 1250);
@@ -353,6 +383,26 @@ document.addEventListener('DOMContentLoaded', () => {
         seedFogTexture();
         buildFogTexture();
         renderFogTexture();
+      };
+
+      resetPageOneFog = () => {
+        if (fogFrame) {
+          window.cancelAnimationFrame(fogFrame);
+          fogFrame = null;
+        }
+
+        isWiping = false;
+        lastPoint = null;
+        isFogCleared = false;
+        isFogDissolving = false;
+        dissolveStart = 0;
+        dissolveSources = [];
+        hasStartedReveal = false;
+        dissolveOrigins.length = 0;
+        revealedCells.clear();
+        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready');
+        document.body.classList.add('is-fog-locked');
+        resizeFog();
       };
 
       const canvasPoint = (event) => {

@@ -229,6 +229,57 @@ a { color: inherit; text-decoration: none; }
   visibility: hidden;
 }
 
+.page1-controls {
+  position: absolute;
+  left: 50%;
+  bottom: calc(43px + env(safe-area-inset-bottom));
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  transform: translateX(-50%);
+}
+
+.page-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  border: 1px solid #fff;
+  border-radius: 40px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.page-control img,
+.music-toggle-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.music-toggle-icon {
+  position: relative;
+}
+
+.music-toggle.is-user-paused .music-toggle-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 25px;
+  height: 2px;
+  border-radius: 999px;
+  background: #fff;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  transform-origin: 50% 50%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page1-fog-canvas {
     opacity: 0.75;
@@ -634,30 +685,6 @@ a { color: inherit; text-decoration: none; }
   height: 15.76%;
   max-width: none;
   object-fit: contain;
-}
-
-.music-toggle {
-  position: fixed;
-  right: 14px;
-  bottom: 14px;
-  z-index: 20;
-  min-width: 62px;
-  min-height: 34px;
-  border: 1px solid rgba(76, 82, 90, 0.38);
-  background: rgba(246, 246, 244, 0.72);
-  color: #4a4c4d;
-  border-radius: 999px;
-  backdrop-filter: blur(8px);
-  cursor: pointer;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  line-height: 1;
-  padding: 0 12px;
-}
-
-.music-toggle[aria-pressed="true"] {
-  background: rgba(74, 76, 77, 0.78);
-  color: #f6f6f4;
 }
 
 /* ---------- RSVP page ---------- */
