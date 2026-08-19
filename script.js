@@ -3,8 +3,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const setAppViewportHeight = () => {
     if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
     viewportFrame = window.requestAnimationFrame(() => {
-      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const visualViewport = window.visualViewport;
+      const viewportHeight = visualViewport?.height || window.innerHeight;
       document.documentElement.style.setProperty('--app-height', `${viewportHeight}px`);
+
+      const page1SceneElement = document.querySelector('.page1-scene');
+      if (page1SceneElement) {
+        const rect = page1SceneElement.getBoundingClientRect();
+        const viewportLeft = visualViewport?.offsetLeft || 0;
+        const viewportTop = visualViewport?.offsetTop || 0;
+        const viewportWidth = visualViewport?.width || window.innerWidth;
+        const viewportRight = viewportLeft + viewportWidth;
+        const viewportBottom = viewportTop + viewportHeight;
+
+        page1SceneElement.style.setProperty('--visible-left', `${Math.max(0, viewportLeft - rect.left)}px`);
+        page1SceneElement.style.setProperty('--visible-top', `${Math.max(0, viewportTop - rect.top)}px`);
+        page1SceneElement.style.setProperty('--visible-right', `${Math.max(0, rect.right - viewportRight)}px`);
+        page1SceneElement.style.setProperty('--visible-bottom', `${Math.max(0, rect.bottom - viewportBottom)}px`);
+      }
+
+      window.dispatchEvent(new Event('appviewportchange'));
       viewportFrame = null;
     });
   };
@@ -477,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fogCanvas.addEventListener('pointercancel', stopWiping);
       fogCanvas.addEventListener('touchend', stopWiping);
       fogCanvas.addEventListener('touchcancel', stopWiping);
+      window.addEventListener('appviewportchange', resizeFog);
       window.addEventListener('resize', resizeFog);
       resizeFog();
     }
