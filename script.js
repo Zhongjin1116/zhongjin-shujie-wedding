@@ -42,18 +42,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const primeBackgroundMusic = async () => {
     if (!backgroundMusic || isMusicPrimed || musicWasManuallyPaused) return false;
 
-    const originalVolume = backgroundMusic.volume;
     try {
+      backgroundMusic.muted = true;
       backgroundMusic.volume = 0;
       await backgroundMusic.play();
       backgroundMusic.pause();
       backgroundMusic.currentTime = 0;
-      backgroundMusic.volume = originalVolume;
       isMusicPrimed = true;
       setMusicState(false);
       return true;
     } catch (_) {
-      backgroundMusic.volume = originalVolume;
+      backgroundMusic.muted = false;
+      backgroundMusic.volume = 1;
       return false;
     }
   };
@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (musicWasManuallyPaused && !userInitiated) return false;
 
     try {
+      backgroundMusic.muted = false;
       backgroundMusic.volume = 1;
       if (restart) backgroundMusic.currentTime = 0;
       await backgroundMusic.play();
@@ -77,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pauseBackgroundMusic = ({ userInitiated = false } = {}) => {
     if (!backgroundMusic) return;
     if (userInitiated) musicWasManuallyPaused = true;
+    backgroundMusic.muted = false;
     backgroundMusic.volume = 1;
     backgroundMusic.pause();
     setMusicState(false);
