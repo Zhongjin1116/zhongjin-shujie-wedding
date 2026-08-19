@@ -223,10 +223,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return x - Math.floor(x);
       };
 
-      const drawImageCover = (targetCtx, image, targetWidth, targetHeight) => {
+      const drawImageCover = (targetCtx, image, targetWidth, targetHeight, scaleBoost = 1) => {
         if (!image.naturalWidth || !image.naturalHeight) return;
 
-        const scale = Math.max(targetWidth / image.naturalWidth, targetHeight / image.naturalHeight);
+        const scale = Math.max(targetWidth / image.naturalWidth, targetHeight / image.naturalHeight) * scaleBoost;
         const drawWidth = image.naturalWidth * scale;
         const drawHeight = image.naturalHeight * scale;
         const drawX = (targetWidth - drawWidth) / 2;
@@ -316,23 +316,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fogTextureCtx.clearRect(0, 0, width, height);
 
+        if (isFigmaFogReady) {
+          fogTextureCtx.save();
+          fogTextureCtx.globalAlpha = 0.92;
+          drawImageCover(fogTextureCtx, figmaFogImage, width, height, 1.55);
+          fogTextureCtx.restore();
+          return;
+        }
+
         const gradient = fogTextureCtx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, 'rgba(227, 235, 226, 0.78)');
-        gradient.addColorStop(0.38, 'rgba(195, 210, 194, 0.68)');
-        gradient.addColorStop(0.72, 'rgba(222, 229, 219, 0.64)');
-        gradient.addColorStop(1, 'rgba(245, 245, 236, 0.78)');
+        gradient.addColorStop(0, 'rgba(227, 235, 226, 0.74)');
+        gradient.addColorStop(0.38, 'rgba(195, 210, 194, 0.64)');
+        gradient.addColorStop(0.72, 'rgba(222, 229, 219, 0.58)');
+        gradient.addColorStop(1, 'rgba(245, 245, 236, 0.76)');
         fogTextureCtx.fillStyle = gradient;
         fogTextureCtx.fillRect(0, 0, width, height);
 
-        if (isFigmaFogReady) {
-          fogTextureCtx.save();
-          fogTextureCtx.filter = `blur(${5 * dpr}px)`;
-          fogTextureCtx.globalAlpha = 0.78;
-          drawImageCover(fogTextureCtx, figmaFogImage, width, height);
-          fogTextureCtx.restore();
-        }
-
-        fogTextureCtx.globalAlpha = isFigmaFogReady ? 0.06 : 0.13;
+        fogTextureCtx.globalAlpha = 0.13;
         fogWisps.forEach((wisp) => {
           fogTextureCtx.strokeStyle = `rgba(255,255,255,${wisp.alpha})`;
           fogTextureCtx.lineWidth = 0.75 * dpr;
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
           fogTextureCtx.stroke();
         });
 
-        fogTextureCtx.globalAlpha = isFigmaFogReady ? 0.08 : 0.2;
+        fogTextureCtx.globalAlpha = 0.2;
         fogSpecks.forEach((speck) => {
           fogTextureCtx.fillStyle = speck.light ? 'rgba(255,255,255,0.42)' : 'rgba(76,96,76,0.18)';
           fogTextureCtx.beginPath();
@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
           drop.y,
           drop.r,
           drop.seed,
-          drop.alpha * (isFigmaFogReady ? 0.45 : 1),
+          drop.alpha,
         ));
         fogTextureCtx.globalAlpha = 1;
       };
