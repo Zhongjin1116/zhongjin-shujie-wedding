@@ -190,8 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const maskCtx = maskCanvas.getContext('2d', { alpha: true });
       const fogTextureCanvas = document.createElement('canvas');
       const fogTextureCtx = fogTextureCanvas.getContext('2d', { alpha: true });
-      const figmaFogImage = new Image();
-      let isFigmaFogReady = false;
       if (!ctx || !maskCtx || !fogTextureCtx) {
         page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-page1-settled');
         document.body.classList.remove('is-fog-locked');
@@ -222,29 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const x = Math.sin(seed * 999) * 10000;
         return x - Math.floor(x);
       };
-
-      const drawImageCover = (targetCtx, image, targetWidth, targetHeight, scaleBoost = 1) => {
-        if (!image.naturalWidth || !image.naturalHeight) return;
-
-        const scale = Math.max(targetWidth / image.naturalWidth, targetHeight / image.naturalHeight) * scaleBoost;
-        const drawWidth = image.naturalWidth * scale;
-        const drawHeight = image.naturalHeight * scale;
-        const drawX = (targetWidth - drawWidth) / 2;
-        const drawY = (targetHeight - drawHeight) / 2;
-        targetCtx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-      };
-
-      const fogImageSrc = fogCanvas.dataset.fogSrc;
-      if (fogImageSrc) {
-        figmaFogImage.onload = () => {
-          isFigmaFogReady = true;
-          if (!isFogCleared) {
-            buildFogTexture();
-            renderFogTexture();
-          }
-        };
-        figmaFogImage.src = fogImageSrc;
-      }
 
       const drawMistBead = (targetCtx, x, y, radius, seed, alpha) => {
         const bead = targetCtx.createRadialGradient(
@@ -315,14 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!fogTextureCtx || !width || !height) return;
 
         fogTextureCtx.clearRect(0, 0, width, height);
-
-        if (isFigmaFogReady) {
-          fogTextureCtx.save();
-          fogTextureCtx.globalAlpha = 0.92;
-          drawImageCover(fogTextureCtx, figmaFogImage, width, height, 1.55);
-          fogTextureCtx.restore();
-          return;
-        }
 
         const gradient = fogTextureCtx.createLinearGradient(0, 0, width, height);
         gradient.addColorStop(0, 'rgba(227, 235, 226, 0.74)');
