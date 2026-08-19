@@ -708,8 +708,9 @@ document.addEventListener('DOMContentLoaded', () => {
       isPage3Transitioning = true;
       page2Scene.classList.remove('is-motion-ready');
       page2Scene.classList.add('is-leaving');
-      page1Scene.classList.remove('is-exiting-to-page2', 'is-returning-to-page1');
-      page3Scene.classList.remove('is-active');
+      page1Scene.classList.remove('is-page2', 'is-exiting-to-page2', 'is-returning-to-page1');
+      page1Scene.classList.add('is-entering-page3');
+      page3Scene.classList.add('is-active');
       page3Scene.classList.remove('is-leaving');
       page3Scene.setAttribute('aria-hidden', 'false');
       setPage3Index(0);
@@ -717,17 +718,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.setTimeout(() => {
         clearPage2State?.();
-        page1Scene.classList.remove('is-page2');
-        page1Scene.classList.add('is-entering-page3');
-        page3Scene.classList.add('is-active');
-        page3Track.offsetHeight;
-      }, PAGE_TRANSITION_MS);
-
-      window.setTimeout(() => {
         page1Scene.classList.remove('is-entering-page3');
         page1Scene.classList.add('is-page3');
         isPage3Transitioning = false;
-      }, PAGE_TRANSITION_MS * 2);
+      }, PAGE_TRANSITION_MS);
     };
 
     returnToPageTwoFromPageThree = () => {
