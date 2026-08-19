@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const page1Scene = document.querySelector('.page1-scene');
   const page2Scene = document.querySelector('.page2-scene');
+  const page2Camera = document.querySelector('.page2-camera');
+  const page2Locations = document.querySelector('.page2-locations');
   const page2Video = document.querySelector('.page2-video');
   const page3Scene = document.querySelector('.page3-scene');
   const page3Photo = document.querySelector('.page3-photo');
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const backgroundMusic = document.getElementById('background-music');
   const musicToggles = document.querySelectorAll('.music-toggle');
   const pageControlButtons = document.querySelectorAll('[data-control-action]');
+  const page1Controls = document.querySelector('.page1-controls');
   let resetPageOneFog = null;
   let activatePage2 = null;
   let isMusicPrimed = false;
@@ -38,6 +41,19 @@ document.addEventListener('DOMContentLoaded', () => {
       toggle.classList.toggle('is-user-paused', !isPlaying && musicWasManuallyPaused);
     });
   };
+
+  const updatePage2LocationsPosition = () => {
+    if (!page2Scene || !page2Camera || !page2Locations || !page1Controls) return;
+
+    const cameraBottom = page2Camera.offsetTop + page2Camera.offsetHeight;
+    const controlsTop = page1Controls.offsetTop;
+    if (!cameraBottom || !controlsTop || controlsTop <= cameraBottom) return;
+
+    page2Scene.style.setProperty('--page2-locations-top', `${(cameraBottom + controlsTop) / 2}px`);
+  };
+
+  window.addEventListener('appviewportchange', updatePage2LocationsPosition);
+  window.addEventListener('resize', updatePage2LocationsPosition);
 
   const primeBackgroundMusic = async () => {
     if (!backgroundMusic || isMusicPrimed || musicWasManuallyPaused) return false;
@@ -616,10 +632,12 @@ document.addEventListener('DOMContentLoaded', () => {
       page2Scene.classList.remove('is-motion-ready');
       page2Scene.classList.add('is-active');
       page2Scene.setAttribute('aria-hidden', 'false');
+      window.requestAnimationFrame(updatePage2LocationsPosition);
       loadPage2Video().then((isReady) => {
         if (isReady) page2Video.play().catch(() => {});
       });
       window.setTimeout(() => {
+        updatePage2LocationsPosition();
         page2Scene.classList.add('is-motion-ready');
       }, 950);
     };

@@ -527,10 +527,7 @@ a { color: inherit; text-decoration: none; }
   --page2-camera-height: 101.24vw;
   --page2-from-top: 19.46%;
   --page2-from-height: 12px;
-  --page2-controls-top: calc(var(--app-height) - env(safe-area-inset-bottom) - 77px);
-  --page2-locations-top: calc(
-    (var(--page2-camera-top) + var(--page2-camera-height) + var(--page2-controls-top)) * 0.5
-  );
+  --page2-locations-top: 72%;
   color: #fff;
   letter-spacing: 0.1em;
 }
