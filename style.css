@@ -149,6 +149,12 @@ a { color: inherit; text-decoration: none; }
   animation: page1-extra-sticker-exit 0.78s cubic-bezier(0.6, 0, 0.4, 1) forwards;
 }
 
+.page1-scene.is-entering-page3 .page1-strawberry-left,
+.page1-scene.is-entering-page3 .page1-deer,
+.page1-scene.is-entering-page3 .page1-butterfly-center {
+  animation: page1-extra-sticker-return 0.78s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 .page1-scene.is-returning-to-page1 .page1-strawberry-left,
 .page1-scene.is-returning-to-page1 .page1-deer,
 .page1-scene.is-returning-to-page1 .page1-butterfly-center {
@@ -156,7 +162,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page1-scene.is-exiting-to-page2 .page1-title,
-.page1-scene.is-page2 .page1-title {
+.page1-scene.is-page2 .page1-title,
+.page1-scene.is-entering-page3 .page1-title,
+.page1-scene.is-page3 .page1-title {
   opacity: 0;
   transition: opacity 0.45s ease;
 }
@@ -167,6 +175,9 @@ a { color: inherit; text-decoration: none; }
 .page1-scene.is-page2 .page1-strawberry-left img,
 .page1-scene.is-page2 .page1-deer img,
 .page1-scene.is-page2 .page1-butterfly-center img,
+.page1-scene.is-entering-page3 .page1-strawberry-left img,
+.page1-scene.is-entering-page3 .page1-deer img,
+.page1-scene.is-entering-page3 .page1-butterfly-center img,
 .page1-scene.is-returning-to-page1 .page1-strawberry-left img,
 .page1-scene.is-returning-to-page1 .page1-deer img,
 .page1-scene.is-returning-to-page1 .page1-butterfly-center img {
@@ -247,7 +258,8 @@ a { color: inherit; text-decoration: none; }
   animation-play-state: running;
 }
 
-.page1-scene.is-page1-settled:not(.is-exiting-to-page2):not(.is-page2):not(.is-returning-to-page1) .page1-sticker {
+.page1-scene.is-page1-settled:not(.is-exiting-to-page2):not(.is-page2):not(.is-entering-page3):not(.is-returning-to-page1) .page1-sticker,
+.page1-scene.is-page3 .page1-sticker {
   opacity: 1;
   animation: none;
   transform: translate(0, 0) scale(1);
@@ -720,131 +732,112 @@ a { color: inherit; text-decoration: none; }
   transition: none;
 }
 
-.page3-scene {
-  --page-bg: url("assets/figma/page3/background.png");
-  color: #4c525a;
+.page3-inline {
+  --page3-index: 0;
+  --page3-card-width: min(80vw, calc(var(--app-height) * 300 / 812));
+  --page3-card-height: calc(var(--page3-card-width) * 4 / 3);
+  --page3-slide-step: min(80vw, calc(var(--app-height) * 300 / 812));
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  color: #fff;
   letter-spacing: 0.1em;
 }
 
-.page3-branch {
-  position: absolute;
-  left: -10.93%;
-  top: -3.69%;
-  width: 99.73%;
-  height: 7.27%;
-  max-width: none;
-  object-fit: cover;
+.page3-inline.is-active {
+  pointer-events: auto;
 }
 
-.page3-ivy {
-  position: absolute;
-  left: 65.87%;
-  top: 1.85%;
-  width: 23.2%;
-  height: 35.1%;
-  max-width: none;
-  object-fit: cover;
-}
-
-.page3-photo-frame {
+.page3-carousel,
+.page3-track {
   position: absolute;
   inset: 0;
+  touch-action: pan-y;
 }
 
-.page3-photo,
-.page3-photo-next {
+.page3-track {
+  transform: translateX(calc(var(--page3-index) * var(--page3-slide-step) * -1));
+  transition: transform 0.82s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.page3-inline:not(.is-active) .page3-track {
+  transform: translateX(112vw);
+}
+
+.page3-inline.is-leaving .page3-track {
+  transform: translateX(112vw);
+  transition-duration: 0.78s;
+  transition-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
+}
+
+.page3-polaroid {
   position: absolute;
-  left: 23.6%;
-  top: 31.53%;
-  width: 53.33%;
-  height: 32.88%;
-  max-width: none;
-  object-fit: cover;
-  transform: scale(1);
+  left: calc(50% + var(--i) * var(--page3-slide-step));
+  top: calc(50% + var(--lift));
+  z-index: 1;
+  width: var(--page3-card-width);
+  height: var(--page3-card-height);
+  margin: 0;
+  transform: translate(-50%, -50%) rotate(var(--tilt));
   transform-origin: 50% 50%;
 }
 
-.page3-photo {
-  opacity: 1;
-  transition: opacity 0.9s ease, transform 5.8s ease;
-}
-
-.page3-photo-next {
-  opacity: 0;
-  transition: opacity 0.9s ease, transform 5.8s ease;
-  transform: scale(1.025);
-}
-
-.page3-photo.is-fading {
-  opacity: 0;
-  transform: scale(1.025);
-}
-
-.page3-photo-next.is-visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.page3-count {
-  transition: opacity 0.35s ease;
-}
-
-.page3-count.is-changing {
-  opacity: 0.35;
-}
-
-.page3-frame-top {
+.page3-slide-photo,
+.page3-rsvp-content,
+.page3-polaroid-frame {
   position: absolute;
-  left: 23.73%;
-  top: 31.28%;
-  width: 54.93%;
-  height: 0.33%;
   max-width: none;
 }
 
-.page3-frame-left {
-  position: absolute;
-  left: 23.04%;
-  top: 31.47%;
-  width: 0.91%;
-  height: 33.6%;
-  max-width: none;
+.page3-slide-photo {
+  left: 9.5%;
+  top: 7.9%;
+  z-index: 1;
+  width: 81.8%;
+  height: 73.8%;
+  object-fit: cover;
 }
 
-.page3-frame-right {
-  position: absolute;
-  left: 76.93%;
-  top: 31.53%;
-  width: 0.94%;
-  height: 32.94%;
-  max-width: none;
+.page3-polaroid-frame {
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
 }
 
-.page3-frame-bottom {
-  position: absolute;
-  left: 23.6%;
-  top: 64.16%;
-  width: 54%;
-  height: 0.6%;
-  max-width: none;
-}
-
-.page3-caption,
-.page3-count {
-  position: absolute;
-  top: 66.13%;
-  font-size: 12px;
-  line-height: 1.5;
+.page3-rsvp-content {
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  display: flex;
+  width: 51%;
+  transform: translate(-50%, -47%);
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
   white-space: nowrap;
 }
 
-.page3-caption {
-  left: 23.73%;
+.page3-rsvp-content a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-.page3-count {
-  right: 23.2%;
-  text-align: right;
+.page3-rsvp-content small {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 92px);
+  transform: translateX(-50%);
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .page4-scene {

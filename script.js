@@ -25,9 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const page2Locations = document.querySelector('.page2-locations');
   const page2Video = document.querySelector('.page2-video');
   const page3Scene = document.querySelector('.page3-scene');
-  const page3Photo = document.querySelector('.page3-photo');
-  const page3PhotoNext = document.querySelector('.page3-photo-next');
-  const page3Count = document.querySelector('.page3-count');
+  const page3Track = document.querySelector('.page3-track');
   const backgroundMusic = document.getElementById('background-music');
   const musicToggles = document.querySelectorAll('.music-toggle');
   const pageControlButtons = document.querySelectorAll('[data-control-action]');
@@ -35,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let resetPageOneFog = null;
   let activatePage2 = null;
   let returnToPageOne = null;
+  let clearPage2State = null;
+  let activatePage3 = null;
+  let returnToPageTwoFromPageThree = null;
+  let showNextPage3Slide = null;
   let isMusicPrimed = false;
   let musicWasManuallyPaused = false;
 
@@ -130,6 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const action = button.dataset.controlAction;
 
       if (action === 'fog') {
+        if (page1Scene?.classList.contains('is-page3')) {
+          returnToPageTwoFromPageThree?.();
+          return;
+        }
+
         if (page1Scene?.classList.contains('is-page2')) {
           returnToPageOne?.();
           return;
@@ -147,12 +154,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPageOneNext = target?.id === 'page2-inline' && page1Scene;
 
         if (isPageOneNext) {
+          if (page1Scene.classList.contains('is-page3')) {
+            showNextPage3Slide?.();
+            return;
+          }
+
           if (page1Scene.classList.contains('is-page2')) {
-            const page3Target = document.querySelector('#page3');
-            document.body.classList.remove('page-one-only', 'is-fog-locked');
-            window.requestAnimationFrame(() => {
-              page3Target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
+            activatePage3?.();
             return;
           }
 
@@ -478,7 +486,12 @@ document.addEventListener('DOMContentLoaded', () => {
         hasStartedReveal = false;
         dissolveOrigins.length = 0;
         revealedCells.clear();
-        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-page1-settled', 'is-exiting-to-page2', 'is-page2', 'is-returning-to-page1');
+        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-page1-settled', 'is-exiting-to-page2', 'is-page2', 'is-entering-page3', 'is-page3', 'is-returning-to-page1');
+        page3Scene?.classList.remove('is-active', 'is-leaving');
+        if (page3Scene) {
+          page3Scene.setAttribute('aria-hidden', 'true');
+          page3Scene.style.setProperty('--page3-index', '0');
+        }
         document.body.classList.add('is-fog-locked');
         resizeFog();
       };
@@ -619,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (page2Scene && page2Video) {
-    const clearPage2State = () => {
+    clearPage2State = () => {
       page2Video.pause();
       page2Video.currentTime = 0;
       page2Scene.classList.remove('is-active', 'is-motion-ready', 'is-leaving');
@@ -662,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       page2Scene.classList.remove('is-motion-ready');
       page2Scene.classList.add('is-leaving');
-      page1Scene.classList.remove('is-exiting-to-page2', 'is-page2');
+      page1Scene.classList.remove('is-exiting-to-page2', 'is-page2', 'is-page3', 'is-entering-page3');
       page1Scene.classList.add('is-returning-to-page1');
 
       window.setTimeout(() => {
@@ -672,86 +685,81 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  if (page3Scene && page3Photo && page3PhotoNext && page3Count) {
-    const page3Images = Array.from({ length: 8 }, (_, index) => `assets/figma/page3/image${index + 1}.jpg`);
+  if (page1Scene && page3Scene && page3Track) {
+    const page3SlideCount = page3Track.querySelectorAll('.page3-polaroid').length;
     let page3Index = 0;
-    let slideshowTimer = null;
-    let isTransitioning = false;
+    let page3TouchStartX = 0;
+    let page3TouchStartY = 0;
+    let page3PointerId = null;
 
-    const preloaders = page3Images.map((src) => {
-      const image = new Image();
-      image.src = src;
-      return image;
-    });
-
-    const waitForImage = async (image) => {
-      if (image.complete && image.naturalWidth > 0) return;
-      if (image.decode) {
-        try {
-          await image.decode();
-          return;
-        } catch (_) {}
-      }
-
-      await new Promise((resolve) => {
-        image.addEventListener('load', resolve, { once: true });
-        image.addEventListener('error', resolve, { once: true });
-      });
+    const setPage3Index = (nextIndex) => {
+      page3Index = Math.max(0, Math.min(page3SlideCount - 1, nextIndex));
+      page3Scene.style.setProperty('--page3-index', String(page3Index));
     };
 
-    const renderSlide = async (nextIndex) => {
-      if (isTransitioning) return;
-      isTransitioning = true;
+    showNextPage3Slide = () => {
+      setPage3Index(page3Index + 1);
+    };
 
-      const nextImage = preloaders[nextIndex];
-      await waitForImage(nextImage);
-      if (!nextImage.naturalWidth) {
-        isTransitioning = false;
-        return;
-      }
+    activatePage3 = () => {
+      if (!page2Scene || page3Scene.classList.contains('is-active')) return;
 
-      page3PhotoNext.src = page3Images[nextIndex];
-      page3PhotoNext.classList.remove('is-visible');
-      page3PhotoNext.offsetHeight;
-      page3Count.classList.add('is-changing');
-      page3Photo.classList.add('is-fading');
-      page3PhotoNext.classList.add('is-visible');
+      page2Scene.classList.remove('is-motion-ready');
+      page2Scene.classList.add('is-leaving');
+      page1Scene.classList.remove('is-page2', 'is-exiting-to-page2', 'is-returning-to-page1');
+      page1Scene.classList.add('is-entering-page3');
+      page3Scene.classList.add('is-active');
+      page3Scene.classList.remove('is-leaving');
+      page3Scene.setAttribute('aria-hidden', 'false');
+      setPage3Index(0);
+      page3Track.offsetHeight;
 
       window.setTimeout(() => {
-        page3Index = nextIndex;
-        page3Photo.src = page3Images[page3Index];
-        page3Count.textContent = `${page3Index + 1}/8`;
-        page3Photo.classList.remove('is-fading');
-        page3PhotoNext.classList.remove('is-visible');
-        page3Count.classList.remove('is-changing');
-        isTransitioning = false;
-      }, 950);
+        clearPage2State?.();
+        page1Scene.classList.remove('is-entering-page3');
+        page1Scene.classList.add('is-page3');
+      }, PAGE_TRANSITION_MS);
     };
 
-    const startSlideshow = () => {
-      if (slideshowTimer) return;
-      slideshowTimer = window.setInterval(() => {
-        renderSlide((page3Index + 1) % page3Images.length);
-      }, 5200);
+    returnToPageTwoFromPageThree = () => {
+      if (!page2Scene || page3Scene.classList.contains('is-leaving')) return;
+
+      page3Scene.classList.add('is-leaving');
+      page1Scene.classList.remove('is-page3');
+      page1Scene.classList.add('is-page2');
+      activatePage2?.();
+
+      window.setTimeout(() => {
+        page3Scene.classList.remove('is-active', 'is-leaving');
+        page3Scene.setAttribute('aria-hidden', 'true');
+        setPage3Index(0);
+      }, PAGE_TRANSITION_MS);
     };
 
-    const stopSlideshow = () => {
-      if (!slideshowTimer) return;
-      window.clearInterval(slideshowTimer);
-      slideshowTimer = null;
-    };
+    page3Scene.addEventListener('pointerdown', (event) => {
+      if (!page3Scene.classList.contains('is-active')) return;
+      page3PointerId = event.pointerId;
+      page3TouchStartX = event.clientX;
+      page3TouchStartY = event.clientY;
+      page3Scene.setPointerCapture?.(event.pointerId);
+    });
 
-    const slideshowObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          startSlideshow();
-        } else {
-          stopSlideshow();
-        }
-      });
-    }, { threshold: 0.55 });
+    page3Scene.addEventListener('pointerup', (event) => {
+      if (page3PointerId !== event.pointerId) return;
 
-    slideshowObserver.observe(page3Scene);
+      const deltaX = event.clientX - page3TouchStartX;
+      const deltaY = event.clientY - page3TouchStartY;
+      page3PointerId = null;
+
+      if (Math.abs(deltaX) < 36 || Math.abs(deltaX) < Math.abs(deltaY) * 1.15) return;
+      setPage3Index(page3Index + (deltaX < 0 ? 1 : -1));
+    });
+
+    page3Scene.addEventListener('pointercancel', () => {
+      page3PointerId = null;
+    });
+
+    setPage3Index(0);
   }
 
 });
