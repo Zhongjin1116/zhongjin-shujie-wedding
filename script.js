@@ -45,11 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const updatePage2LocationsPosition = () => {
     if (!page2Scene || !page2Camera || !page2Locations || !page1Controls) return;
 
-    const cameraBottom = page2Camera.offsetTop + page2Camera.offsetHeight;
+    const cameraBodyBottom = page2Camera.offsetTop + page2Camera.offsetHeight * 0.72;
     const controlsTop = page1Controls.offsetTop;
-    if (!cameraBottom || !controlsTop || controlsTop <= cameraBottom) return;
+    if (!cameraBodyBottom || !controlsTop || controlsTop <= cameraBodyBottom) return;
 
-    page2Scene.style.setProperty('--page2-locations-top', `${(cameraBottom + controlsTop) / 2}px`);
+    page2Scene.style.setProperty('--page2-locations-top', `${(cameraBodyBottom + controlsTop) / 2}px`);
   };
 
   window.addEventListener('appviewportchange', updatePage2LocationsPosition);
