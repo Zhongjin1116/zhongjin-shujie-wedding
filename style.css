@@ -31,8 +31,9 @@ a { color: inherit; text-decoration: none; }
 .hero {
   width: 100%;
   min-height: 100svh;
+  height: 100dvh;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   padding: 0;
   position: relative;
@@ -47,6 +48,12 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
   flex: 0 0 auto;
   background: #0a1d10;
+}
+
+@supports (height: 100dvh) {
+  .page1-scene {
+    width: max(100vw, calc(100dvh * 375 / 812));
+  }
 }
 
 .page1-scene img,
