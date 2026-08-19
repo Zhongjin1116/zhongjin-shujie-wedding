@@ -691,6 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let page3TouchStartX = 0;
     let page3TouchStartY = 0;
     let page3PointerId = null;
+    let isPage3Transitioning = false;
 
     const setPage3Index = (nextIndex) => {
       page3Index = Math.max(0, Math.min(page3SlideCount - 1, nextIndex));
@@ -702,13 +703,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     activatePage3 = () => {
-      if (!page2Scene || page3Scene.classList.contains('is-active')) return;
+      if (!page2Scene || page3Scene.classList.contains('is-active') || isPage3Transitioning) return;
 
+      isPage3Transitioning = true;
       page2Scene.classList.remove('is-motion-ready');
       page2Scene.classList.add('is-leaving');
-      page1Scene.classList.remove('is-page2', 'is-exiting-to-page2', 'is-returning-to-page1');
-      page1Scene.classList.add('is-entering-page3');
-      page3Scene.classList.add('is-active');
+      page1Scene.classList.remove('is-exiting-to-page2', 'is-returning-to-page1');
+      page3Scene.classList.remove('is-active');
       page3Scene.classList.remove('is-leaving');
       page3Scene.setAttribute('aria-hidden', 'false');
       setPage3Index(0);
@@ -716,14 +717,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.setTimeout(() => {
         clearPage2State?.();
+        page1Scene.classList.remove('is-page2');
+        page1Scene.classList.add('is-entering-page3');
+        page3Scene.classList.add('is-active');
+        page3Track.offsetHeight;
+      }, PAGE_TRANSITION_MS);
+
+      window.setTimeout(() => {
         page1Scene.classList.remove('is-entering-page3');
         page1Scene.classList.add('is-page3');
-      }, PAGE_TRANSITION_MS);
+        isPage3Transitioning = false;
+      }, PAGE_TRANSITION_MS * 2);
     };
 
     returnToPageTwoFromPageThree = () => {
-      if (!page2Scene || page3Scene.classList.contains('is-leaving')) return;
+      if (!page2Scene || page3Scene.classList.contains('is-leaving') || isPage3Transitioning) return;
 
+      isPage3Transitioning = true;
       page3Scene.classList.add('is-leaving');
       page1Scene.classList.remove('is-page3');
       page1Scene.classList.add('is-page2');
@@ -733,6 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
         page3Scene.classList.remove('is-active', 'is-leaving');
         page3Scene.setAttribute('aria-hidden', 'true');
         setPage3Index(0);
+        isPage3Transitioning = false;
       }, PAGE_TRANSITION_MS);
     };
 
