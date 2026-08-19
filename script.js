@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const PAGE_TRANSITION_MS = 780;
+  const PAGE2_START_DELAY_MS = 620;
+  const CAMERA_ENTER_MS = 950;
   let viewportFrame = null;
   const setAppViewportHeight = () => {
     if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
@@ -31,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const page1Controls = document.querySelector('.page1-controls');
   let resetPageOneFog = null;
   let activatePage2 = null;
+  let returnToPageOne = null;
   let isMusicPrimed = false;
   let musicWasManuallyPaused = false;
 
@@ -100,6 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setMusicState(false);
   };
 
+  const resetStartPageAudio = () => {
+    pauseBackgroundMusic();
+    if (backgroundMusic) backgroundMusic.currentTime = 0;
+    isMusicPrimed = false;
+    musicWasManuallyPaused = false;
+    setMusicState(false);
+  };
+
   if (backgroundMusic && musicToggles.length) {
     musicToggles.forEach((toggle) => toggle.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -118,19 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const action = button.dataset.controlAction;
 
       if (action === 'fog') {
+        if (page1Scene?.classList.contains('is-page2')) {
+          returnToPageOne?.();
+          return;
+        }
+
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
         document.body.classList.add('page-one-only');
-        pauseBackgroundMusic();
-        if (backgroundMusic) backgroundMusic.currentTime = 0;
-        isMusicPrimed = false;
-        musicWasManuallyPaused = false;
-        setMusicState(false);
-        if (page2Scene && page2Video) {
-          page2Video.pause();
-          page2Video.currentTime = 0;
-          page2Scene.classList.remove('is-active', 'is-motion-ready');
-          page2Scene.setAttribute('aria-hidden', 'true');
-        }
+        resetStartPageAudio();
         resetPageOneFog?.();
         return;
       }
@@ -153,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
           window.setTimeout(() => {
             page1Scene.classList.add('is-page2');
             activatePage2?.();
-          }, 620);
+          }, PAGE2_START_DELAY_MS);
           return;
         }
 
@@ -612,6 +619,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (page2Scene && page2Video) {
+    const clearPage2State = () => {
+      page2Video.pause();
+      page2Video.currentTime = 0;
+      page2Scene.classList.remove('is-active', 'is-motion-ready', 'is-leaving');
+      page2Scene.setAttribute('aria-hidden', 'true');
+    };
+
     const loadPage2Video = async () => {
       if (page2Video.dataset.ready === 'true') return true;
       if (page2Video.dataset.ready === 'false') return false;
@@ -629,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     activatePage2 = () => {
+      page1Scene?.classList.remove('is-returning-to-page1');
       page2Scene.classList.remove('is-motion-ready');
       page2Scene.classList.add('is-active');
       page2Scene.setAttribute('aria-hidden', 'false');
@@ -639,7 +654,21 @@ document.addEventListener('DOMContentLoaded', () => {
       window.setTimeout(() => {
         updatePage2LocationsPosition();
         page2Scene.classList.add('is-motion-ready');
-      }, 950);
+      }, CAMERA_ENTER_MS);
+    };
+
+    returnToPageOne = () => {
+      if (!page1Scene || page2Scene.classList.contains('is-leaving')) return;
+
+      page2Scene.classList.remove('is-motion-ready');
+      page2Scene.classList.add('is-leaving');
+      page1Scene.classList.remove('is-exiting-to-page2', 'is-page2');
+      page1Scene.classList.add('is-returning-to-page1');
+
+      window.setTimeout(() => {
+        clearPage2State();
+        page1Scene.classList.remove('is-returning-to-page1');
+      }, PAGE_TRANSITION_MS);
     };
   }
 

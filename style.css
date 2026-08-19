@@ -149,6 +149,12 @@ a { color: inherit; text-decoration: none; }
   animation: page1-extra-sticker-exit 0.78s cubic-bezier(0.6, 0, 0.4, 1) forwards;
 }
 
+.page1-scene.is-returning-to-page1 .page1-strawberry-left,
+.page1-scene.is-returning-to-page1 .page1-deer,
+.page1-scene.is-returning-to-page1 .page1-butterfly-center {
+  animation: page1-extra-sticker-return 0.78s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 .page1-scene.is-exiting-to-page2 .page1-title,
 .page1-scene.is-page2 .page1-title {
   opacity: 0;
@@ -160,7 +166,10 @@ a { color: inherit; text-decoration: none; }
 .page1-scene.is-exiting-to-page2 .page1-butterfly-center img,
 .page1-scene.is-page2 .page1-strawberry-left img,
 .page1-scene.is-page2 .page1-deer img,
-.page1-scene.is-page2 .page1-butterfly-center img {
+.page1-scene.is-page2 .page1-butterfly-center img,
+.page1-scene.is-returning-to-page1 .page1-strawberry-left img,
+.page1-scene.is-returning-to-page1 .page1-deer img,
+.page1-scene.is-returning-to-page1 .page1-butterfly-center img {
   animation: none;
 }
 
@@ -355,6 +364,15 @@ a { color: inherit; text-decoration: none; }
   }
 }
 
+@keyframes page1-extra-sticker-return {
+  from {
+    transform: translate(var(--exit-x), var(--exit-y)) scale(0.94);
+  }
+  to {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
 @keyframes page1-strawberry-top-motion {
   0% { transform: rotate(var(--r, 0deg)) scaleX(var(--sx, 1)) scaleY(var(--sy, 1)); }
   50% { transform: rotate(13.52deg) scaleX(var(--sx, 1)) scaleY(var(--sy, 1)); }
@@ -395,6 +413,15 @@ a { color: inherit; text-decoration: none; }
   }
   to {
     transform: translateX(-50%) translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes page2-camera-exit {
+  from {
+    transform: translateX(-50%) translate(0, 0) rotate(0deg);
+  }
+  to {
+    transform: translateX(28%) translateY(8px) rotate(1.4deg);
   }
 }
 
@@ -584,6 +611,11 @@ a { color: inherit; text-decoration: none; }
   animation: page2-camera-motion 2s linear infinite;
 }
 
+.page2-scene.is-leaving .page2-camera {
+  opacity: 1;
+  animation: page2-camera-exit 0.78s cubic-bezier(0.6, 0, 0.4, 1) forwards;
+}
+
 .page2-video {
   position: absolute;
   left: 14.6%;
@@ -674,6 +706,12 @@ a { color: inherit; text-decoration: none; }
 .page2-scene.is-active .page2-from,
 .page2-scene.is-active .page2-locations {
   opacity: 1;
+}
+
+.page2-scene.is-leaving .page2-from,
+.page2-scene.is-leaving .page2-locations {
+  opacity: 0;
+  transition: none;
 }
 
 .page3-scene {
