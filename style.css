@@ -248,7 +248,7 @@ a { color: inherit; text-decoration: none; }
   left: auto;
   top: auto;
   right: 15.6%;
-  bottom: 71.8%;
+  bottom: 73.2%;
   width: 12.4%;
   height: 5.42%;
 }
@@ -737,7 +737,7 @@ a { color: inherit; text-decoration: none; }
   --page3-card-width: min(90vw, calc(var(--app-height) * 338 / 812));
   --page3-card-height: calc(var(--page3-card-width) * 4 / 3);
   --page3-slide-step: min(90vw, calc(var(--app-height) * 338 / 812));
-  --page3-track-y: -3.2vh;
+  --page3-track-y: -2vh;
   position: absolute;
   inset: 0;
   z-index: 1;
