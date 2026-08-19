@@ -231,7 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const startReveal = () => {
           if (hasStartedReveal) return;
           hasStartedReveal = true;
-          page1Scene.classList.add('is-revealed');
+          isFogCleared = true;
+          isFogDissolving = false;
+          ctx.clearRect(0, 0, width, height);
+          maskCtx.clearRect(0, 0, width, height);
+          page1Scene.classList.remove('is-fog-dissolving');
+          page1Scene.classList.add('is-fog-cleared', 'is-revealed');
+          document.body.classList.remove('is-fog-locked');
           window.setTimeout(() => {
             page1Scene.classList.add('is-motion-ready');
           }, 1250);
@@ -282,16 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!hasStartedReveal && isVisibleFogCleared(radius, eased)) {
               startReveal();
+              fogFrame = null;
+              return;
             }
 
             if (elapsed >= 1) {
-              isFogCleared = true;
-              isFogDissolving = false;
-              ctx.clearRect(0, 0, width, height);
-              maskCtx.clearRect(0, 0, width, height);
-              page1Scene.classList.remove('is-fog-dissolving');
-              page1Scene.classList.add('is-fog-cleared');
-              document.body.classList.remove('is-fog-locked');
               startReveal();
               fogFrame = null;
               return;
