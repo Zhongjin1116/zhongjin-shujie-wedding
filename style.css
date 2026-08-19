@@ -211,9 +211,9 @@ a { color: inherit; text-decoration: none; }
 
 .page1-deer {
   --from-x: 46%;
-  --from-y: 12%;
+  --from-y: 4%;
   --exit-x: 76vw;
-  --exit-y: 18vh;
+  --exit-y: 6vh;
   --r: 169.25deg;
   --sy: -1;
   --delay: 0s;
