@@ -64,12 +64,14 @@ a { color: inherit; text-decoration: none; }
 
 .page1-bg {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: 0;
+  top: 50%;
+  width: 108%;
+  height: 108%;
   max-width: none;
   object-fit: cover;
-  object-position: 36% center;
+  object-position: left center;
+  transform: translateY(-50%);
 }
 
 .page1-title {
