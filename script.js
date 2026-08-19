@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fogTextureCanvas = document.createElement('canvas');
       const fogTextureCtx = fogTextureCanvas.getContext('2d', { alpha: true });
       if (!ctx || !maskCtx || !fogTextureCtx) {
-        page1Scene.classList.add('is-fog-cleared', 'is-revealed');
+        page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready');
         document.body.classList.remove('is-fog-locked');
       }
       let dpr = 1;
@@ -248,6 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
               page1Scene.classList.remove('is-fog-dissolving');
               page1Scene.classList.add('is-fog-cleared', 'is-revealed');
               document.body.classList.remove('is-fog-locked');
+              window.setTimeout(() => {
+                page1Scene.classList.add('is-motion-ready');
+              }, 2300);
               fogFrame = null;
               return;
             }
