@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let activatePage3 = null;
   let returnToPageTwoFromPageThree = null;
   let showNextPage3Slide = null;
+  let showPreviousPage3Slide = null;
   let isMusicPrimed = false;
   let musicWasManuallyPaused = false;
 
@@ -133,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (action === 'fog') {
         if (page1Scene?.classList.contains('is-page3')) {
-          returnToPageTwoFromPageThree?.();
+          showPreviousPage3Slide?.();
           return;
         }
 
@@ -699,7 +700,21 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     showNextPage3Slide = () => {
+      if (page3Index >= page3SlideCount - 1) {
+        window.location.href = 'rsvp.html';
+        return;
+      }
+
       setPage3Index(page3Index + 1);
+    };
+
+    showPreviousPage3Slide = () => {
+      if (page3Index > 0) {
+        setPage3Index(page3Index - 1);
+        return;
+      }
+
+      returnToPageTwoFromPageThree?.();
     };
 
     activatePage3 = () => {
