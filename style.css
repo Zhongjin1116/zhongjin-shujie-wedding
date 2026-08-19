@@ -8,6 +8,7 @@
   --font-body: 'Noto Sans SC', -apple-system, sans-serif;
   --font-figma-type: 'Anonymous Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
   --max-width: 720px;
+  --app-height: 100dvh;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,13 +26,17 @@ body.is-fog-locked {
   overflow: hidden;
 }
 
+body.page-one-only {
+  overflow: hidden;
+}
+
 a { color: inherit; text-decoration: none; }
 
 /* ---------- Hero ---------- */
 .hero {
   width: 100%;
-  min-height: 100svh;
-  height: 100dvh;
+  min-height: var(--app-height);
+  height: var(--app-height);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -43,17 +48,11 @@ a { color: inherit; text-decoration: none; }
 
 .page1-scene {
   position: relative;
-  width: max(100vw, calc(100svh * 375 / 812));
+  width: max(100vw, calc(var(--app-height) * 375 / 812));
   aspect-ratio: 375 / 812;
   overflow: hidden;
   flex: 0 0 auto;
   background: #0a1d10;
-}
-
-@supports (height: 100dvh) {
-  .page1-scene {
-    width: max(100vw, calc(100dvh * 375 / 812));
-  }
 }
 
 .page1-scene img,
@@ -293,7 +292,8 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Figma pages ---------- */
 .figma-section {
   width: 100%;
-  min-height: 100svh;
+  min-height: var(--app-height);
+  height: var(--app-height);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -305,9 +305,13 @@ a { color: inherit; text-decoration: none; }
 .figma-frame,
 .figma-scene {
   position: relative;
-  width: max(100vw, calc(100svh * 375 / 812));
+  width: max(100vw, calc(var(--app-height) * 375 / 812));
   aspect-ratio: 375 / 812;
   flex: 0 0 auto;
+}
+
+.page-one-only .figma-section {
+  display: none;
 }
 
 .figma-frame {

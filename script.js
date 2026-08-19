@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
+  let viewportFrame = null;
+  const setAppViewportHeight = () => {
+    if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
+    viewportFrame = window.requestAnimationFrame(() => {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', `${viewportHeight}px`);
+      viewportFrame = null;
+    });
+  };
+
+  setAppViewportHeight();
+  window.addEventListener('resize', setAppViewportHeight);
+  window.visualViewport?.addEventListener('resize', setAppViewportHeight);
+  window.visualViewport?.addEventListener('scroll', setAppViewportHeight);
+
   const page1Scene = document.querySelector('.page1-scene');
   const page2Scene = document.querySelector('.page2-scene');
   const page2Video = document.querySelector('.page2-video');
