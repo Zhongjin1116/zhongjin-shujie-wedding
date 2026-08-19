@@ -98,7 +98,7 @@ a { color: inherit; text-decoration: none; }
   justify-content: center;
   pointer-events: none;
   opacity: 0;
-  animation: sticker-enter 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: sticker-enter 1.95s cubic-bezier(0.18, 0.92, 0.22, 1) forwards;
   animation-delay: var(--delay, 0s);
   animation-play-state: paused;
 }
@@ -182,12 +182,16 @@ a { color: inherit; text-decoration: none; }
   pointer-events: auto;
   touch-action: none;
   cursor: crosshair;
-  transition: opacity 1.15s ease, visibility 0s linear 1.15s;
+}
+
+.page1-scene.is-fog-dissolving .page1-fog-canvas,
+.page1-scene.is-fog-cleared .page1-fog-canvas {
+  pointer-events: none;
+  cursor: default;
 }
 
 .page1-scene.is-fog-cleared .page1-fog-canvas {
   opacity: 0;
-  pointer-events: none;
   visibility: hidden;
 }
 
@@ -207,7 +211,7 @@ a { color: inherit; text-decoration: none; }
     opacity: 0;
     transform: translate(var(--from-x), var(--from-y)) scale(0.96);
   }
-  70% {
+  82% {
     opacity: 1;
   }
   to {

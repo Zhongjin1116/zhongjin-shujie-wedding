@@ -66,12 +66,96 @@ document.addEventListener('DOMContentLoaded', () => {
       let revealCols = 0;
       let revealRows = 0;
       let revealTotal = 0;
+      let dissolveFrame = null;
+      const fogDissolveMs = 3100;
+      const dissolveOrigins = [];
       const revealedCells = new Set();
       if (ctx) document.body.classList.add('is-fog-locked');
 
       const random = (seed) => {
         const x = Math.sin(seed * 999) * 10000;
         return x - Math.floor(x);
+      };
+
+      const drawDrop = (x, y, radius, seed, alpha) => {
+        const stretch = 1 + random(seed + 1) * 0.65;
+        const wobble = (random(seed + 2) - 0.5) * radius * 0.35;
+        const trailLength = radius * (1.8 + random(seed + 3) * 5.2);
+        const hasTrail = radius > 7 * dpr && random(seed + 4) > 0.28;
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        if (hasTrail) {
+          const trail = ctx.createLinearGradient(x, y + radius * 0.35, x + wobble, y + trailLength);
+          trail.addColorStop(0, 'rgba(255,255,255,0.34)');
+          trail.addColorStop(0.42, 'rgba(176,190,178,0.16)');
+          trail.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.strokeStyle = trail;
+          ctx.lineWidth = Math.max(1, radius * 0.18);
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(x, y + radius * 0.45);
+          ctx.bezierCurveTo(
+            x + wobble * 0.35,
+            y + trailLength * 0.34,
+            x + wobble,
+            y + trailLength * 0.68,
+            x + wobble * 0.5,
+            y + trailLength,
+          );
+          ctx.stroke();
+        }
+
+        const drop = ctx.createRadialGradient(
+          x - radius * 0.33,
+          y - radius * 0.42,
+          radius * 0.08,
+          x,
+          y + radius * 0.12,
+          radius * 1.24,
+        );
+        drop.addColorStop(0, 'rgba(255,255,255,0.72)');
+        drop.addColorStop(0.2, 'rgba(240,247,244,0.42)');
+        drop.addColorStop(0.62, 'rgba(124,144,132,0.22)');
+        drop.addColorStop(0.82, 'rgba(42,66,45,0.18)');
+        drop.addColorStop(1, 'rgba(255,255,255,0)');
+
+        ctx.fillStyle = drop;
+        ctx.beginPath();
+        ctx.ellipse(x, y, radius * 0.82, radius * stretch, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = alpha * 0.55;
+        ctx.strokeStyle = 'rgba(255,255,255,0.58)';
+        ctx.lineWidth = Math.max(0.7, radius * 0.08);
+        ctx.beginPath();
+        ctx.ellipse(
+          x - radius * 0.14,
+          y - radius * 0.12,
+          radius * 0.55,
+          radius * stretch * 0.78,
+          -0.08,
+          Math.PI * 1.05,
+          Math.PI * 1.8,
+        );
+        ctx.stroke();
+
+        ctx.globalAlpha = alpha * 0.7;
+        ctx.fillStyle = 'rgba(255,255,255,0.62)';
+        ctx.beginPath();
+        ctx.ellipse(
+          x - radius * 0.28,
+          y - radius * 0.42,
+          Math.max(0.9, radius * 0.13),
+          Math.max(0.7, radius * 0.08),
+          -0.45,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+
+        ctx.restore();
       };
 
       const drawFogTexture = (alpha = 1) => {
@@ -88,33 +172,44 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
 
-        ctx.globalAlpha = alpha * 0.2;
-        for (let i = 0; i < 520; i++) {
+        ctx.globalAlpha = alpha * 0.16;
+        for (let i = 0; i < 760; i++) {
           const x = random(i + 11) * width;
           const y = random(i + 29) * height;
-          const r = (random(i + 47) * 1.8 + 0.5) * dpr;
+          const r = (random(i + 47) * 1.7 + 0.35) * dpr;
           ctx.fillStyle = i % 3 === 0 ? 'rgba(255,255,255,0.35)' : 'rgba(95,112,95,0.18)';
           ctx.beginPath();
           ctx.arc(x, y, r, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        for (let i = 0; i < 34; i++) {
-          const x = random(i + 101) * width;
-          const y = random(i + 131) * height;
-          const r = (random(i + 151) * 13 + 8) * dpr;
-          const drop = ctx.createRadialGradient(x - r * 0.25, y - r * 0.28, r * 0.05, x, y, r);
-          drop.addColorStop(0, 'rgba(255,255,255,0.55)');
-          drop.addColorStop(0.35, 'rgba(224,235,235,0.28)');
-          drop.addColorStop(0.75, 'rgba(150,165,150,0.16)');
-          drop.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = drop;
+        ctx.globalAlpha = alpha * 0.18;
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = 0.7 * dpr;
+        for (let i = 0; i < 44; i++) {
+          const y = random(i + 75) * height;
+          const wave = (random(i + 83) * 38 + 18) * dpr;
           ctx.beginPath();
-          ctx.arc(x, y, r, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(0, y);
+          ctx.bezierCurveTo(width * 0.24, y - wave, width * 0.58, y + wave, width, y - wave * 0.25);
+          ctx.stroke();
         }
 
-        ctx.globalAlpha = alpha * 0.24;
+        for (let i = 0; i < 62; i++) {
+          const x = random(i + 101) * width;
+          const y = random(i + 131) * height;
+          const r = (random(i + 151) * 10 + 3.5) * dpr;
+          drawDrop(x, y, r, i + 401, alpha * (0.28 + random(i + 173) * 0.48));
+        }
+
+        for (let i = 0; i < 18; i++) {
+          const x = random(i + 511) * width;
+          const y = random(i + 523) * height * 0.82;
+          const r = (random(i + 541) * 17 + 12) * dpr;
+          drawDrop(x, y, r, i + 601, alpha * 0.62);
+        }
+
+        ctx.globalAlpha = alpha * 0.18;
         ctx.strokeStyle = 'rgba(255,255,255,0.55)';
         ctx.lineWidth = 1.1 * dpr;
         for (let i = 0; i < 26; i++) {
@@ -148,6 +243,10 @@ document.addEventListener('DOMContentLoaded', () => {
         revealRows = 40;
         revealTotal = revealCols * revealRows;
         revealedCells.clear();
+        if (isFogCleared) {
+          ctx.clearRect(0, 0, width, height);
+          return;
+        }
         drawFogTexture(1);
       };
 
@@ -193,15 +292,84 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
         ctx.restore();
 
+        const lastOrigin = dissolveOrigins[dissolveOrigins.length - 1];
+        const originGap = radius * 0.86;
+        if (!lastOrigin || (lastOrigin.x - point.x) ** 2 + (lastOrigin.y - point.y) ** 2 > originGap * originGap) {
+          dissolveOrigins.push({ x: point.x, y: point.y });
+        }
+
         markRevealed(point, radius);
       };
 
       const clearAllFog = () => {
         if (isFogCleared) return;
         isFogCleared = true;
-        ctx?.clearRect(0, 0, width, height);
-        page1Scene.classList.add('is-fog-cleared', 'is-revealed');
-        document.body.classList.remove('is-fog-locked');
+
+        page1Scene.classList.add('is-fog-dissolving');
+        isWiping = false;
+        lastPoint = null;
+
+        const startTime = performance.now();
+        const originPoints = dissolveOrigins.length
+          ? dissolveOrigins.slice(-46)
+          : [{ x: width * 0.5, y: height * 0.45 }];
+        const maxRadius = Math.hypot(width, height) * 0.78;
+
+        const dissolve = (time) => {
+          if (!ctx) return;
+
+          const elapsed = Math.min(1, (time - startTime) / fogDissolveMs);
+          const eased = 1 - (1 - elapsed) ** 3;
+          const radius = (54 * dpr) + maxRadius * eased;
+
+          ctx.save();
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.shadowColor = 'rgba(0,0,0,0.34)';
+          ctx.shadowBlur = (18 + 22 * eased) * dpr;
+          ctx.fillStyle = 'rgba(0,0,0,0.86)';
+
+          originPoints.forEach((origin, index) => {
+            const seed = index * 17 + 9;
+            const driftX = (random(seed) - 0.5) * 42 * dpr * eased;
+            const driftY = (random(seed + 1) - 0.5) * 42 * dpr * eased;
+            const ripple = radius * (0.72 + random(seed + 2) * 0.36);
+
+            ctx.beginPath();
+            ctx.arc(origin.x + driftX, origin.y + driftY, ripple, 0, Math.PI * 2);
+            ctx.fill();
+
+            for (let dot = 0; dot < 4; dot++) {
+              const angle = random(seed + dot + 3) * Math.PI * 2;
+              const distance = ripple * (0.76 + random(seed + dot + 7) * 0.32);
+              const dotRadius = ripple * (0.08 + random(seed + dot + 11) * 0.1);
+              ctx.beginPath();
+              ctx.arc(
+                origin.x + driftX + Math.cos(angle) * distance,
+                origin.y + driftY + Math.sin(angle) * distance,
+                dotRadius,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+            }
+          });
+
+          ctx.restore();
+
+          if (elapsed < 1) {
+            dissolveFrame = window.requestAnimationFrame(dissolve);
+            return;
+          }
+
+          ctx?.clearRect(0, 0, width, height);
+          page1Scene.classList.remove('is-fog-dissolving');
+          page1Scene.classList.add('is-fog-cleared', 'is-revealed');
+          document.body.classList.remove('is-fog-locked');
+        };
+
+        dissolveFrame = window.requestAnimationFrame(dissolve);
       };
 
       const markRevealed = (point, radius) => {
@@ -227,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        if (revealedCells.size / revealTotal >= 0.2) {
+        if (revealedCells.size / revealTotal >= 0.1) {
           clearAllFog();
         }
       };
