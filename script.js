@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pageControlButtons = document.querySelectorAll('[data-control-action]');
   let resetPageOneFog = null;
   let activatePage2 = null;
+  let isMusicPrimed = false;
   let musicWasManuallyPaused = false;
 
   const setMusicState = (isPlaying) => {
@@ -38,11 +39,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  const playBackgroundMusic = async ({ userInitiated = false } = {}) => {
+  const primeBackgroundMusic = async () => {
+    if (!backgroundMusic || isMusicPrimed || musicWasManuallyPaused) return false;
+
+    const originalVolume = backgroundMusic.volume;
+    try {
+      backgroundMusic.volume = 0;
+      await backgroundMusic.play();
+      isMusicPrimed = true;
+      setMusicState(false);
+      return true;
+    } catch (_) {
+      backgroundMusic.volume = originalVolume;
+      return false;
+    }
+  };
+
+  const playBackgroundMusic = async ({ userInitiated = false, restart = false } = {}) => {
     if (!backgroundMusic || !musicToggles.length) return false;
     if (musicWasManuallyPaused && !userInitiated) return false;
 
     try {
+      backgroundMusic.volume = 1;
+      if (restart) backgroundMusic.currentTime = 0;
       await backgroundMusic.play();
       setMusicState(true);
       return true;
@@ -55,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pauseBackgroundMusic = ({ userInitiated = false } = {}) => {
     if (!backgroundMusic) return;
     if (userInitiated) musicWasManuallyPaused = true;
+    backgroundMusic.volume = 1;
     backgroundMusic.pause();
     setMusicState(false);
   };
@@ -80,6 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
         document.body.classList.add('page-one-only');
         pauseBackgroundMusic();
+        if (backgroundMusic) backgroundMusic.currentTime = 0;
+        isMusicPrimed = false;
         musicWasManuallyPaused = false;
         setMusicState(false);
         if (page2Scene && page2Video) {
@@ -314,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
           document.body.classList.remove('is-fog-locked');
           window.setTimeout(() => {
             page1Scene.classList.add('is-motion-ready');
-            playBackgroundMusic();
+            playBackgroundMusic({ restart: true });
           }, 1250);
         };
 
@@ -525,11 +547,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       fogCanvas.addEventListener('pointerdown', (event) => {
         event.preventDefault();
+        primeBackgroundMusic();
         isWiping = true;
         fogCanvas.setPointerCapture?.(event.pointerId);
         lastPoint = canvasPoint(event);
         wipeAt(lastPoint);
       });
+
+      fogCanvas.addEventListener('touchstart', () => {
+        primeBackgroundMusic();
+      }, { passive: true });
 
       fogCanvas.addEventListener('pointermove', (event) => {
         if (!isWiping) return;
