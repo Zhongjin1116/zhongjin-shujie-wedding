@@ -46,6 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       backgroundMusic.volume = 0;
       await backgroundMusic.play();
+      backgroundMusic.pause();
+      backgroundMusic.currentTime = 0;
+      backgroundMusic.volume = originalVolume;
       isMusicPrimed = true;
       setMusicState(false);
       return true;
