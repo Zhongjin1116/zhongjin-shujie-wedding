@@ -53,7 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (fogCanvas) {
       const ctx = fogCanvas.getContext('2d', { alpha: true });
-      if (!ctx) {
+      const maskCanvas = document.createElement('canvas');
+      const maskCtx = maskCanvas.getContext('2d', { alpha: true });
+      if (!ctx || !maskCtx) {
         page1Scene.classList.add('is-fog-cleared', 'is-revealed');
         document.body.classList.remove('is-fog-locked');
       }
@@ -66,21 +68,29 @@ document.addEventListener('DOMContentLoaded', () => {
       let revealCols = 0;
       let revealRows = 0;
       let revealTotal = 0;
-      let dissolveFrame = null;
-      const fogDissolveMs = 3100;
+      let fogFrame = null;
+      let lastFogTime = 0;
+      let isFogDissolving = false;
+      let dissolveStart = 0;
+      let dissolveSources = [];
+      const fogDissolveMs = 3300;
       const dissolveOrigins = [];
       const revealedCells = new Set();
-      if (ctx) document.body.classList.add('is-fog-locked');
+      const fogSpecks = [];
+      const fogWisps = [];
+      const staticDrops = [];
+      const waterDrops = [];
+      if (ctx && maskCtx) document.body.classList.add('is-fog-locked');
 
       const random = (seed) => {
         const x = Math.sin(seed * 999) * 10000;
         return x - Math.floor(x);
       };
 
-      const drawDrop = (x, y, radius, seed, alpha) => {
+      const drawDrop = (x, y, radius, seed, alpha, stretchBoost = 0) => {
         const stretch = 1 + random(seed + 1) * 0.65;
         const wobble = (random(seed + 2) - 0.5) * radius * 0.35;
-        const trailLength = radius * (1.8 + random(seed + 3) * 5.2);
+        const trailLength = radius * (1.2 + random(seed + 3) * 3.4);
         const hasTrail = radius > 7 * dpr && random(seed + 4) > 0.28;
 
         ctx.save();
@@ -123,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.fillStyle = drop;
         ctx.beginPath();
-        ctx.ellipse(x, y, radius * 0.82, radius * stretch, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, y, radius * 0.82, radius * (stretch + stretchBoost), 0, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.globalAlpha = alpha * 0.55;
@@ -134,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
           x - radius * 0.14,
           y - radius * 0.12,
           radius * 0.55,
-          radius * stretch * 0.78,
+          radius * (stretch + stretchBoost) * 0.78,
           -0.08,
           Math.PI * 1.05,
           Math.PI * 1.8,
@@ -158,87 +168,235 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
       };
 
-      const drawFogTexture = (alpha = 1) => {
-        if (!ctx || !width || !height) return;
+      const seedFogTexture = () => {
+        fogSpecks.length = 0;
+        fogWisps.length = 0;
+        staticDrops.length = 0;
 
+        for (let i = 0; i < 900; i++) {
+          fogSpecks.push({
+            x: random(i + 11) * width,
+            y: random(i + 29) * height,
+            r: (random(i + 47) * 1.65 + 0.28) * dpr,
+            light: i % 3 === 0,
+          });
+        }
+
+        for (let i = 0; i < 54; i++) {
+          fogWisps.push({
+            y: random(i + 75) * height,
+            wave: (random(i + 83) * 42 + 16) * dpr,
+            alpha: 0.08 + random(i + 91) * 0.16,
+          });
+        }
+
+        for (let i = 0; i < 90; i++) {
+          staticDrops.push({
+            x: random(i + 101) * width,
+            y: random(i + 131) * height,
+            r: (random(i + 151) * 10 + 2.5) * dpr,
+            seed: i + 401,
+            alpha: 0.2 + random(i + 173) * 0.42,
+          });
+        }
+
+        for (let i = 0; i < 24; i++) {
+          staticDrops.push({
+            x: random(i + 511) * width,
+            y: random(i + 523) * height * 0.84,
+            r: (random(i + 541) * 17 + 10) * dpr,
+            seed: i + 601,
+            alpha: 0.46,
+          });
+        }
+      };
+
+      const eraseMaskAt = (x, y, radius, softness = 0.28) => {
+        if (!maskCtx) return;
+
+        const gradient = maskCtx.createRadialGradient(x, y, radius * softness, x, y, radius);
+        gradient.addColorStop(0, 'rgba(0,0,0,0.96)');
+        gradient.addColorStop(0.72, 'rgba(0,0,0,0.64)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        maskCtx.save();
+        maskCtx.globalCompositeOperation = 'destination-out';
+        maskCtx.fillStyle = gradient;
+        maskCtx.beginPath();
+        maskCtx.arc(x, y, radius, 0, Math.PI * 2);
+        maskCtx.fill();
+        maskCtx.restore();
+      };
+
+      const spawnWaterDrop = (x = Math.random() * width, y = Math.random() * height * 0.42) => {
+        if (waterDrops.length >= 120 || !width || !height) return;
+
+        const seed = Math.random() * 1000;
+        const r = (2.4 + Math.random() * 7.6) * dpr;
+        waterDrops.push({
+          x,
+          y,
+          r,
+          vx: 0,
+          vy: (4 + Math.random() * 18) * dpr,
+          seed,
+          age: 0,
+          wobble: Math.random() * Math.PI * 2,
+          stuck: Math.random() * 0.55,
+          trail: 0,
+        });
+      };
+
+      const updateWaterDrops = (dt, time) => {
+        if (!maskCtx || isFogCleared) return;
+
+        const spawnRate = isFogDissolving ? 0 : 6.8;
+        if (Math.random() < dt * spawnRate) {
+          spawnWaterDrop();
+        }
+
+        for (let i = waterDrops.length - 1; i >= 0; i--) {
+          const drop = waterDrops[i];
+          drop.age += dt;
+          drop.wobble += dt * 3.2;
+
+          const wasStuck = drop.stuck > 0;
+          if (wasStuck) {
+            drop.stuck -= dt;
+            drop.r += 0.45 * dpr * dt;
+          } else {
+            drop.vy += (36 + drop.r * 9) * dpr * dt;
+            drop.vy = Math.min(drop.vy, (58 + drop.r * 14) * dpr);
+          }
+
+          drop.vx = Math.sin(drop.wobble + time * 0.0018 + drop.seed) * 8 * dpr;
+
+          const prevX = drop.x;
+          const prevY = drop.y;
+          drop.x += drop.vx * dt;
+          drop.y += drop.vy * dt;
+
+          const distance = Math.hypot(drop.x - prevX, drop.y - prevY);
+          drop.trail += distance;
+          const trailRadius = Math.max(1.2 * dpr, drop.r * 0.48);
+          const step = Math.max(2 * dpr, trailRadius * 0.75);
+
+          while (drop.trail > step) {
+            drop.trail -= step;
+            const ratio = distance ? drop.trail / distance : 0;
+            eraseMaskAt(
+              drop.x - (drop.x - prevX) * ratio,
+              drop.y - (drop.y - prevY) * ratio,
+              trailRadius,
+              0.12,
+            );
+          }
+
+          drop.r -= distance * 0.0025;
+
+          if (drop.r < 1.1 * dpr || drop.y > height + 28 * dpr || drop.x < -30 * dpr || drop.x > width + 30 * dpr) {
+            waterDrops.splice(i, 1);
+          }
+        }
+      };
+
+      const renderFogTexture = (time = 0) => {
+        if (!ctx || !maskCtx || !width || !height) return;
+
+        ctx.clearRect(0, 0, width, height);
         ctx.save();
         ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = alpha;
 
         const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, 'rgba(220, 229, 218, 0.68)');
-        gradient.addColorStop(0.42, 'rgba(198, 211, 194, 0.58)');
-        gradient.addColorStop(1, 'rgba(236, 238, 227, 0.74)');
+        gradient.addColorStop(0, 'rgba(227, 235, 226, 0.74)');
+        gradient.addColorStop(0.38, 'rgba(195, 210, 194, 0.64)');
+        gradient.addColorStop(0.72, 'rgba(222, 229, 219, 0.58)');
+        gradient.addColorStop(1, 'rgba(245, 245, 236, 0.76)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
 
-        ctx.globalAlpha = alpha * 0.16;
-        for (let i = 0; i < 760; i++) {
-          const x = random(i + 11) * width;
-          const y = random(i + 29) * height;
-          const r = (random(i + 47) * 1.7 + 0.35) * dpr;
-          ctx.fillStyle = i % 3 === 0 ? 'rgba(255,255,255,0.35)' : 'rgba(95,112,95,0.18)';
-          ctx.beginPath();
-          ctx.arc(x, y, r, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.globalAlpha = alpha * 0.18;
-        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-        ctx.lineWidth = 0.7 * dpr;
-        for (let i = 0; i < 44; i++) {
-          const y = random(i + 75) * height;
-          const wave = (random(i + 83) * 38 + 18) * dpr;
+        ctx.globalAlpha = 0.13;
+        fogWisps.forEach((wisp, index) => {
+          const y = wisp.y + Math.sin(time * 0.00016 + index) * 6 * dpr;
+          ctx.strokeStyle = `rgba(255,255,255,${wisp.alpha})`;
+          ctx.lineWidth = 0.75 * dpr;
           ctx.beginPath();
           ctx.moveTo(0, y);
-          ctx.bezierCurveTo(width * 0.24, y - wave, width * 0.58, y + wave, width, y - wave * 0.25);
+          ctx.bezierCurveTo(width * 0.26, y - wisp.wave, width * 0.58, y + wisp.wave, width, y - wisp.wave * 0.25);
           ctx.stroke();
-        }
+        });
 
-        for (let i = 0; i < 62; i++) {
-          const x = random(i + 101) * width;
-          const y = random(i + 131) * height;
-          const r = (random(i + 151) * 10 + 3.5) * dpr;
-          drawDrop(x, y, r, i + 401, alpha * (0.28 + random(i + 173) * 0.48));
-        }
-
-        for (let i = 0; i < 18; i++) {
-          const x = random(i + 511) * width;
-          const y = random(i + 523) * height * 0.82;
-          const r = (random(i + 541) * 17 + 12) * dpr;
-          drawDrop(x, y, r, i + 601, alpha * 0.62);
-        }
-
-        ctx.globalAlpha = alpha * 0.18;
-        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-        ctx.lineWidth = 1.1 * dpr;
-        for (let i = 0; i < 26; i++) {
-          const x = random(i + 211) * width;
-          const y = random(i + 233) * height * 0.72;
-          const len = (random(i + 257) * 160 + 46) * dpr;
+        ctx.globalAlpha = 0.2;
+        fogSpecks.forEach((speck) => {
+          ctx.fillStyle = speck.light ? 'rgba(255,255,255,0.42)' : 'rgba(76,96,76,0.18)';
           ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.bezierCurveTo(
-            x + (random(i + 281) - 0.5) * 9 * dpr,
-            y + len * 0.28,
-            x + (random(i + 307) - 0.5) * 11 * dpr,
-            y + len * 0.62,
-            x + (random(i + 331) - 0.5) * 7 * dpr,
-            y + len,
-          );
-          ctx.stroke();
-        }
+          ctx.arc(speck.x, speck.y, speck.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
 
+        staticDrops.forEach((drop) => drawDrop(drop.x, drop.y, drop.r, drop.seed, drop.alpha));
+        waterDrops.forEach((drop) => {
+          const stretch = Math.min(drop.vy / (130 * dpr), 1.2);
+          drawDrop(drop.x, drop.y, drop.r, drop.seed, Math.min(0.72, 0.25 + drop.age * 1.5), stretch);
+        });
+
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.globalAlpha = 1;
+        ctx.drawImage(maskCanvas, 0, 0);
         ctx.restore();
       };
 
+      const startFogLoop = () => {
+        if (fogFrame || !ctx || !maskCtx) return;
+
+        const tick = (time) => {
+          const dt = lastFogTime ? Math.min(0.05, (time - lastFogTime) / 1000) : 0.016;
+          lastFogTime = time;
+
+          if (isFogDissolving && dissolveStart) {
+            const elapsed = Math.min(1, (time - dissolveStart) / fogDissolveMs);
+            const eased = 1 - (1 - elapsed) ** 3;
+            const radius = (46 * dpr) + Math.hypot(width, height) * 0.86 * eased;
+
+            dissolveSources.forEach((origin, index) => {
+              const seed = index * 17 + 9;
+              const driftX = (random(seed) - 0.5) * 44 * dpr * eased;
+              const driftY = (random(seed + 1) - 0.5) * 44 * dpr * eased;
+              eraseMaskAt(origin.x + driftX, origin.y + driftY, radius * (0.78 + random(seed + 2) * 0.35), 0.18);
+            });
+
+            if (elapsed >= 1) {
+              isFogCleared = true;
+              isFogDissolving = false;
+              ctx.clearRect(0, 0, width, height);
+              maskCtx.clearRect(0, 0, width, height);
+              page1Scene.classList.remove('is-fog-dissolving');
+              page1Scene.classList.add('is-fog-cleared', 'is-revealed');
+              document.body.classList.remove('is-fog-locked');
+              fogFrame = null;
+              return;
+            }
+          }
+
+          updateWaterDrops(dt, time);
+          renderFogTexture(time);
+
+          fogFrame = window.requestAnimationFrame(tick);
+        };
+
+        fogFrame = window.requestAnimationFrame(tick);
+      };
+
       const resizeFog = () => {
+        if (!ctx || !maskCtx) return;
+
         const rect = fogCanvas.getBoundingClientRect();
         dpr = Math.min(window.devicePixelRatio || 1, 2);
         width = Math.max(1, Math.round(rect.width * dpr));
         height = Math.max(1, Math.round(rect.height * dpr));
         fogCanvas.width = width;
         fogCanvas.height = height;
+        maskCanvas.width = width;
+        maskCanvas.height = height;
         revealCols = 18;
         revealRows = 40;
         revealTotal = revealCols * revealRows;
@@ -247,7 +405,15 @@ document.addEventListener('DOMContentLoaded', () => {
           ctx.clearRect(0, 0, width, height);
           return;
         }
-        drawFogTexture(1);
+        if (maskCtx) {
+          maskCtx.clearRect(0, 0, width, height);
+          maskCtx.fillStyle = '#fff';
+          maskCtx.fillRect(0, 0, width, height);
+        }
+        waterDrops.length = 0;
+        seedFogTexture();
+        renderFogTexture();
+        startFogLoop();
       };
 
       const canvasPoint = (event) => {
@@ -267,30 +433,24 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const wipeAt = (point, previous = null) => {
-        if (!ctx || isFogCleared) return;
-
-        ctx.save();
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = 'rgba(0,0,0,0.88)';
-        ctx.fillStyle = 'rgba(0,0,0,0.88)';
-        ctx.shadowColor = 'rgba(0,0,0,0.45)';
-        ctx.shadowBlur = 18 * dpr;
+        if (!ctx || !maskCtx || isFogCleared || isFogDissolving) return;
 
         const radius = 42 * dpr;
         if (previous) {
-          ctx.lineWidth = radius * 1.35;
-          ctx.beginPath();
-          ctx.moveTo(previous.x, previous.y);
-          ctx.lineTo(point.x, point.y);
-          ctx.stroke();
+          const distance = Math.hypot(point.x - previous.x, point.y - previous.y);
+          const steps = Math.max(1, Math.ceil(distance / (radius * 0.42)));
+          for (let step = 0; step <= steps; step++) {
+            const t = step / steps;
+            eraseMaskAt(
+              previous.x + (point.x - previous.x) * t,
+              previous.y + (point.y - previous.y) * t,
+              radius,
+              0.22,
+            );
+          }
+        } else {
+          eraseMaskAt(point.x, point.y, radius, 0.22);
         }
-
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
 
         const lastOrigin = dissolveOrigins[dissolveOrigins.length - 1];
         const originGap = radius * 0.86;
@@ -298,78 +458,22 @@ document.addEventListener('DOMContentLoaded', () => {
           dissolveOrigins.push({ x: point.x, y: point.y });
         }
 
+        renderFogTexture(performance.now());
         markRevealed(point, radius);
       };
 
       const clearAllFog = () => {
-        if (isFogCleared) return;
-        isFogCleared = true;
+        if (isFogCleared || isFogDissolving) return;
 
+        isFogDissolving = true;
         page1Scene.classList.add('is-fog-dissolving');
         isWiping = false;
         lastPoint = null;
-
-        const startTime = performance.now();
-        const originPoints = dissolveOrigins.length
+        dissolveStart = performance.now();
+        dissolveSources = dissolveOrigins.length
           ? dissolveOrigins.slice(-46)
           : [{ x: width * 0.5, y: height * 0.45 }];
-        const maxRadius = Math.hypot(width, height) * 0.78;
-
-        const dissolve = (time) => {
-          if (!ctx) return;
-
-          const elapsed = Math.min(1, (time - startTime) / fogDissolveMs);
-          const eased = 1 - (1 - elapsed) ** 3;
-          const radius = (54 * dpr) + maxRadius * eased;
-
-          ctx.save();
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.shadowColor = 'rgba(0,0,0,0.34)';
-          ctx.shadowBlur = (18 + 22 * eased) * dpr;
-          ctx.fillStyle = 'rgba(0,0,0,0.86)';
-
-          originPoints.forEach((origin, index) => {
-            const seed = index * 17 + 9;
-            const driftX = (random(seed) - 0.5) * 42 * dpr * eased;
-            const driftY = (random(seed + 1) - 0.5) * 42 * dpr * eased;
-            const ripple = radius * (0.72 + random(seed + 2) * 0.36);
-
-            ctx.beginPath();
-            ctx.arc(origin.x + driftX, origin.y + driftY, ripple, 0, Math.PI * 2);
-            ctx.fill();
-
-            for (let dot = 0; dot < 4; dot++) {
-              const angle = random(seed + dot + 3) * Math.PI * 2;
-              const distance = ripple * (0.76 + random(seed + dot + 7) * 0.32);
-              const dotRadius = ripple * (0.08 + random(seed + dot + 11) * 0.1);
-              ctx.beginPath();
-              ctx.arc(
-                origin.x + driftX + Math.cos(angle) * distance,
-                origin.y + driftY + Math.sin(angle) * distance,
-                dotRadius,
-                0,
-                Math.PI * 2,
-              );
-              ctx.fill();
-            }
-          });
-
-          ctx.restore();
-
-          if (elapsed < 1) {
-            dissolveFrame = window.requestAnimationFrame(dissolve);
-            return;
-          }
-
-          ctx?.clearRect(0, 0, width, height);
-          page1Scene.classList.remove('is-fog-dissolving');
-          page1Scene.classList.add('is-fog-cleared', 'is-revealed');
-          document.body.classList.remove('is-fog-locked');
-        };
-
-        dissolveFrame = window.requestAnimationFrame(dissolve);
+        startFogLoop();
       };
 
       const markRevealed = (point, radius) => {
