@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let isFogDissolving = false;
       let dissolveStart = 0;
       let dissolveSources = [];
+      let hasStartedReveal = false;
       const fogDissolveMs = 3300;
       const dissolveOrigins = [];
       const revealedCells = new Set();
@@ -227,6 +228,45 @@ document.addEventListener('DOMContentLoaded', () => {
       const startFogLoop = () => {
         if (fogFrame || !ctx || !maskCtx) return;
 
+        const startReveal = () => {
+          if (hasStartedReveal) return;
+          hasStartedReveal = true;
+          page1Scene.classList.add('is-revealed');
+          window.setTimeout(() => {
+            page1Scene.classList.add('is-motion-ready');
+          }, 1250);
+        };
+
+        const isVisibleFogCleared = (radius, eased) => {
+          if (eased > 0.9) return true;
+
+          const rect = fogCanvas.getBoundingClientRect();
+          const left = Math.max(0, -rect.left) * dpr;
+          const top = Math.max(0, -rect.top) * dpr;
+          const right = Math.min(rect.width, window.innerWidth - rect.left) * dpr;
+          const bottom = Math.min(rect.height, window.innerHeight - rect.top) * dpr;
+
+          if (right <= left || bottom <= top) return eased > 0.68;
+
+          const samplePoints = [
+            { x: left, y: top },
+            { x: right, y: top },
+            { x: left, y: bottom },
+            { x: right, y: bottom },
+            { x: (left + right) / 2, y: (top + bottom) / 2 },
+          ];
+
+          return samplePoints.every((point) => (
+            dissolveSources.some((origin, index) => {
+              const seed = index * 17 + 9;
+              const driftX = (random(seed) - 0.5) * 44 * dpr * eased;
+              const driftY = (random(seed + 1) - 0.5) * 44 * dpr * eased;
+              const clearRadius = radius * (0.78 + random(seed + 2) * 0.35);
+              return Math.hypot(point.x - origin.x - driftX, point.y - origin.y - driftY) <= clearRadius;
+            })
+          ));
+        };
+
         const tick = (time) => {
           if (isFogDissolving && dissolveStart) {
             const elapsed = Math.min(1, (time - dissolveStart) / fogDissolveMs);
@@ -240,17 +280,19 @@ document.addEventListener('DOMContentLoaded', () => {
               eraseMaskAt(origin.x + driftX, origin.y + driftY, radius * (0.78 + random(seed + 2) * 0.35), 0.18);
             });
 
+            if (!hasStartedReveal && isVisibleFogCleared(radius, eased)) {
+              startReveal();
+            }
+
             if (elapsed >= 1) {
               isFogCleared = true;
               isFogDissolving = false;
               ctx.clearRect(0, 0, width, height);
               maskCtx.clearRect(0, 0, width, height);
               page1Scene.classList.remove('is-fog-dissolving');
-              page1Scene.classList.add('is-fog-cleared', 'is-revealed');
+              page1Scene.classList.add('is-fog-cleared');
               document.body.classList.remove('is-fog-locked');
-              window.setTimeout(() => {
-                page1Scene.classList.add('is-motion-ready');
-              }, 1250);
+              startReveal();
               fogFrame = null;
               return;
             }
