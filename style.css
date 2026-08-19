@@ -204,7 +204,7 @@ a { color: inherit; text-decoration: none; }
   --r: 79.72deg;
   --delay: 0s;
   left: -8.2%;
-  top: 19.8%;
+  top: 17.4%;
   width: 30.96%;
   height: 13.13%;
 }
@@ -734,9 +734,10 @@ a { color: inherit; text-decoration: none; }
 
 .page3-inline {
   --page3-index: 0;
-  --page3-card-width: min(86vw, calc(var(--app-height) * 322 / 812));
+  --page3-card-width: min(90vw, calc(var(--app-height) * 338 / 812));
   --page3-card-height: calc(var(--page3-card-width) * 4 / 3);
-  --page3-slide-step: min(86vw, calc(var(--app-height) * 322 / 812));
+  --page3-slide-step: min(90vw, calc(var(--app-height) * 338 / 812));
+  --page3-track-y: -3.2vh;
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -758,17 +759,20 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page3-track {
-  transform: translateX(calc(var(--page3-index) * var(--page3-slide-step) * -1));
+  transform: translate(
+    calc(var(--page3-index) * var(--page3-slide-step) * -1),
+    var(--page3-track-y)
+  );
   transition: transform 0.82s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
 .page3-inline:not(.is-active) .page3-track {
-  transform: translateX(112vw);
+  transform: translate(112vw, var(--page3-track-y));
 }
 
 .page3-inline.is-leaving .page3-track {
-  transform: translateX(112vw);
+  transform: translate(112vw, var(--page3-track-y));
   transition-duration: 0.78s;
   transition-timing-function: cubic-bezier(0.6, 0, 0.4, 1);
 }
