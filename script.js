@@ -316,20 +316,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fogTextureCtx.clearRect(0, 0, width, height);
 
+        const gradient = fogTextureCtx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, 'rgba(227, 235, 226, 0.78)');
+        gradient.addColorStop(0.38, 'rgba(195, 210, 194, 0.68)');
+        gradient.addColorStop(0.72, 'rgba(222, 229, 219, 0.64)');
+        gradient.addColorStop(1, 'rgba(245, 245, 236, 0.78)');
+        fogTextureCtx.fillStyle = gradient;
+        fogTextureCtx.fillRect(0, 0, width, height);
+
         if (isFigmaFogReady) {
           fogTextureCtx.save();
           fogTextureCtx.filter = `blur(${5 * dpr}px)`;
-          fogTextureCtx.globalAlpha = 0.7;
+          fogTextureCtx.globalAlpha = 0.78;
           drawImageCover(fogTextureCtx, figmaFogImage, width, height);
           fogTextureCtx.restore();
-        } else {
-          const gradient = fogTextureCtx.createLinearGradient(0, 0, width, height);
-          gradient.addColorStop(0, 'rgba(227, 235, 226, 0.74)');
-          gradient.addColorStop(0.38, 'rgba(195, 210, 194, 0.64)');
-          gradient.addColorStop(0.72, 'rgba(222, 229, 219, 0.58)');
-          gradient.addColorStop(1, 'rgba(245, 245, 236, 0.76)');
-          fogTextureCtx.fillStyle = gradient;
-          fogTextureCtx.fillRect(0, 0, width, height);
         }
 
         fogTextureCtx.globalAlpha = isFigmaFogReady ? 0.06 : 0.13;
