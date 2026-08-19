@@ -55,8 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const ctx = fogCanvas.getContext('2d', { alpha: true });
       const maskCanvas = document.createElement('canvas');
       const maskCtx = maskCanvas.getContext('2d', { alpha: true });
-      if (!ctx || !maskCtx) {
-        page1Scene.classList.add('is-fog-cleared', 'is-revealed');
+      const fogTextureCanvas = document.createElement('canvas');
+      const fogTextureCtx = fogTextureCanvas.getContext('2d', { alpha: true });
+      if (!ctx || !maskCtx || !fogTextureCtx) {
+        page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready');
         document.body.classList.remove('is-fog-locked');
       }
       let dpr = 1;
@@ -82,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const waterDrops = [];
       const wetSources = [];
       let dripBudget = 3;
-      if (ctx && maskCtx) document.body.classList.add('is-fog-locked');
+      if (ctx && maskCtx && fogTextureCtx) document.body.classList.add('is-fog-locked');
 
       const random = (seed) => {
         const x = Math.sin(seed * 999) * 10000;
@@ -170,8 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
       };
 
-      const drawMistBead = (x, y, radius, seed, alpha) => {
-        const bead = ctx.createRadialGradient(
+      const drawMistBead = (targetCtx, x, y, radius, seed, alpha) => {
+        const bead = targetCtx.createRadialGradient(
           x - radius * 0.25,
           y - radius * 0.3,
           radius * 0.08,
@@ -183,13 +185,13 @@ document.addEventListener('DOMContentLoaded', () => {
         bead.addColorStop(0.55, `rgba(226,235,226,${0.18 * alpha})`);
         bead.addColorStop(1, 'rgba(255,255,255,0)');
 
-        ctx.save();
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = bead;
-        ctx.beginPath();
-        ctx.arc(x, y, radius * (0.82 + random(seed + 5) * 0.24), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        targetCtx.save();
+        targetCtx.globalAlpha = 1;
+        targetCtx.fillStyle = bead;
+        targetCtx.beginPath();
+        targetCtx.arc(x, y, radius * (0.82 + random(seed + 5) * 0.24), 0, Math.PI * 2);
+        targetCtx.fill();
+        targetCtx.restore();
       };
 
       const seedFogTexture = () => {
@@ -235,6 +237,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
 
+      const buildFogTexture = () => {
+        if (!fogTextureCtx || !width || !height) return;
+
+        fogTextureCtx.clearRect(0, 0, width, height);
+
+        const gradient = fogTextureCtx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, 'rgba(227, 235, 226, 0.74)');
+        gradient.addColorStop(0.38, 'rgba(195, 210, 194, 0.64)');
+        gradient.addColorStop(0.72, 'rgba(222, 229, 219, 0.58)');
+        gradient.addColorStop(1, 'rgba(245, 245, 236, 0.76)');
+        fogTextureCtx.fillStyle = gradient;
+        fogTextureCtx.fillRect(0, 0, width, height);
+
+        fogTextureCtx.globalAlpha = 0.13;
+        fogWisps.forEach((wisp) => {
+          fogTextureCtx.strokeStyle = `rgba(255,255,255,${wisp.alpha})`;
+          fogTextureCtx.lineWidth = 0.75 * dpr;
+          fogTextureCtx.beginPath();
+          fogTextureCtx.moveTo(0, wisp.y);
+          fogTextureCtx.bezierCurveTo(
+            width * 0.26,
+            wisp.y - wisp.wave,
+            width * 0.58,
+            wisp.y + wisp.wave,
+            width,
+            wisp.y - wisp.wave * 0.25,
+          );
+          fogTextureCtx.stroke();
+        });
+
+        fogTextureCtx.globalAlpha = 0.2;
+        fogSpecks.forEach((speck) => {
+          fogTextureCtx.fillStyle = speck.light ? 'rgba(255,255,255,0.42)' : 'rgba(76,96,76,0.18)';
+          fogTextureCtx.beginPath();
+          fogTextureCtx.arc(speck.x, speck.y, speck.r, 0, Math.PI * 2);
+          fogTextureCtx.fill();
+        });
+
+        staticDrops.forEach((drop) => drawMistBead(fogTextureCtx, drop.x, drop.y, drop.r, drop.seed, drop.alpha));
+        fogTextureCtx.globalAlpha = 1;
+      };
+
       const eraseMaskAt = (x, y, radius, softness = 0.28) => {
         if (!maskCtx) return;
 
@@ -273,14 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const seed = Math.random() * 1000;
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * source.radius * 0.34;
-        const r = (0.85 + Math.random() * 1.75) * dpr;
+        const r = (1.2 + Math.random() * 3.4) * dpr;
         dripBudget -= 1;
         waterDrops.push({
           x: source.x + Math.cos(angle) * distance,
           y: source.y + Math.sin(angle) * distance * 0.38,
           r,
           vx: 0,
-          vy: (1.2 + Math.random() * 5.6) * dpr,
+          vy: (1.6 + Math.random() * 7.4) * dpr,
           seed,
           age: 0,
           wobble: Math.random() * Math.PI * 2,
@@ -313,10 +357,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const wasStuck = drop.stuck > 0;
           if (wasStuck) {
             drop.stuck -= dt;
-            drop.r += 0.06 * dpr * dt;
+            drop.r += 0.1 * dpr * dt;
           } else {
-            drop.vy += (10 + drop.r * 4) * dpr * dt;
-            drop.vy = Math.min(drop.vy, (22 + drop.r * 7) * dpr);
+            drop.vy += (13 + drop.r * 4.8) * dpr * dt;
+            drop.vy = Math.min(drop.vy, (28 + drop.r * 7.5) * dpr);
           }
 
           drop.vx = Math.sin(drop.wobble + time * 0.0018 + drop.seed) * 1.6 * dpr;
@@ -328,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const distance = Math.hypot(drop.x - prevX, drop.y - prevY);
           drop.trail += distance;
-          const trailRadius = Math.max(0.45 * dpr, drop.r * 0.3);
+          const trailRadius = Math.max(0.65 * dpr, drop.r * 0.36);
           const step = Math.max(1.1 * dpr, trailRadius);
 
           while (drop.trail > step) {
@@ -344,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           drop.r -= distance * 0.0045;
 
-          if (drop.r < 0.45 * dpr || drop.y > height + 28 * dpr || drop.x < -30 * dpr || drop.x > width + 30 * dpr) {
+          if (drop.r < 0.7 * dpr || drop.y > height + 28 * dpr || drop.x < -30 * dpr || drop.x > width + 30 * dpr) {
             waterDrops.splice(i, 1);
           }
         }
@@ -356,35 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, width, height);
         ctx.save();
         ctx.globalCompositeOperation = 'source-over';
-
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, 'rgba(227, 235, 226, 0.74)');
-        gradient.addColorStop(0.38, 'rgba(195, 210, 194, 0.64)');
-        gradient.addColorStop(0.72, 'rgba(222, 229, 219, 0.58)');
-        gradient.addColorStop(1, 'rgba(245, 245, 236, 0.76)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.globalAlpha = 0.13;
-        fogWisps.forEach((wisp, index) => {
-          const y = wisp.y + Math.sin(time * 0.00016 + index) * 6 * dpr;
-          ctx.strokeStyle = `rgba(255,255,255,${wisp.alpha})`;
-          ctx.lineWidth = 0.75 * dpr;
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.bezierCurveTo(width * 0.26, y - wisp.wave, width * 0.58, y + wisp.wave, width, y - wisp.wave * 0.25);
-          ctx.stroke();
-        });
-
-        ctx.globalAlpha = 0.2;
-        fogSpecks.forEach((speck) => {
-          ctx.fillStyle = speck.light ? 'rgba(255,255,255,0.42)' : 'rgba(76,96,76,0.18)';
-          ctx.beginPath();
-          ctx.arc(speck.x, speck.y, speck.r, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        staticDrops.forEach((drop) => drawMistBead(drop.x, drop.y, drop.r, drop.seed, drop.alpha));
+        ctx.drawImage(fogTextureCanvas, 0, 0);
 
         ctx.globalCompositeOperation = 'destination-in';
         ctx.globalAlpha = 1;
@@ -422,8 +438,14 @@ document.addEventListener('DOMContentLoaded', () => {
               ctx.clearRect(0, 0, width, height);
               maskCtx.clearRect(0, 0, width, height);
               page1Scene.classList.remove('is-fog-dissolving');
-              page1Scene.classList.add('is-fog-cleared', 'is-revealed');
+              page1Scene.classList.add('is-fog-cleared');
               document.body.classList.remove('is-fog-locked');
+              window.setTimeout(() => {
+                page1Scene.classList.add('is-revealed');
+              }, 500);
+              window.setTimeout(() => {
+                page1Scene.classList.add('is-motion-ready');
+              }, 1550);
               fogFrame = null;
               return;
             }
@@ -439,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const resizeFog = () => {
-        if (!ctx || !maskCtx) return;
+        if (!ctx || !maskCtx || !fogTextureCtx) return;
 
         const rect = fogCanvas.getBoundingClientRect();
         dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -449,6 +471,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fogCanvas.height = height;
         maskCanvas.width = width;
         maskCanvas.height = height;
+        fogTextureCanvas.width = width;
+        fogTextureCanvas.height = height;
         revealCols = 18;
         revealRows = 40;
         revealTotal = revealCols * revealRows;
@@ -466,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wetSources.length = 0;
         dripBudget = 3;
         seedFogTexture();
+        buildFogTexture();
         renderFogTexture();
         startFogLoop();
       };
