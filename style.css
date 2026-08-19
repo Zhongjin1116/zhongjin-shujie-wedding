@@ -234,6 +234,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page1-scene.is-revealed .page1-sticker {
+  opacity: 1;
   animation-play-state: running;
 }
 
@@ -338,25 +339,18 @@ a { color: inherit; text-decoration: none; }
 
 @keyframes sticker-enter {
   from {
-    opacity: 0;
     transform: translate(var(--from-x), var(--from-y)) scale(0.96);
   }
-  82% {
-    opacity: 1;
-  }
   to {
-    opacity: 1;
     transform: translate(0, 0) scale(1);
   }
 }
 
 @keyframes page1-extra-sticker-exit {
   from {
-    opacity: 1;
     transform: translate(0, 0) scale(1);
   }
   to {
-    opacity: 0;
     transform: translate(var(--exit-x), var(--exit-y)) scale(0.94);
   }
 }
@@ -397,11 +391,9 @@ a { color: inherit; text-decoration: none; }
 
 @keyframes page2-camera-enter {
   from {
-    opacity: 0;
     transform: translateX(28%) translateY(8px) rotate(1.4deg);
   }
   to {
-    opacity: 1;
     transform: translateX(-50%) translate(0, 0) rotate(0deg);
   }
 }
@@ -529,6 +521,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page2-scene {
+  --page2-camera-left: 62%;
+  --page2-camera-top: 23.4%;
+  --page2-camera-width: 117vw;
   color: #fff;
   letter-spacing: 0.1em;
 }
@@ -565,10 +560,10 @@ a { color: inherit; text-decoration: none; }
 
 .page2-camera {
   position: absolute;
-  left: 62%;
-  top: 23.4%;
+  left: var(--page2-camera-left);
+  top: var(--page2-camera-top);
   z-index: 2;
-  width: 117%;
+  width: var(--page2-camera-width);
   aspect-ratio: 527 / 456;
   overflow: hidden;
   opacity: 0;
@@ -576,6 +571,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page2-scene.is-active .page2-camera {
+  opacity: 1;
   animation: page2-camera-enter 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
@@ -610,7 +606,7 @@ a { color: inherit; text-decoration: none; }
 .page2-locations {
   position: absolute;
   left: 50%;
-  top: 68.4%;
+  top: calc(var(--page2-camera-top) + 49vw);
   z-index: 2;
   opacity: 0;
   display: flex;
