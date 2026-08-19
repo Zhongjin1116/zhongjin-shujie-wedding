@@ -69,7 +69,7 @@ a { color: inherit; text-decoration: none; }
   height: 100%;
   max-width: none;
   object-fit: cover;
-  object-position: center;
+  object-position: 36% center;
 }
 
 .page1-title {
