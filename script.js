@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
               document.body.classList.remove('is-fog-locked');
               window.setTimeout(() => {
                 page1Scene.classList.add('is-motion-ready');
-              }, 2300);
+              }, 1250);
               fogFrame = null;
               return;
             }
