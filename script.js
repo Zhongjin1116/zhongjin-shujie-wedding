@@ -97,8 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPageOneNext = target?.id === 'page2-inline' && page1Scene;
 
         if (isPageOneNext) {
-          musicWasManuallyPaused = false;
-          playBackgroundMusic({ userInitiated: true });
+          if (page1Scene.classList.contains('is-page2')) {
+            const page3Target = document.querySelector('#page3');
+            document.body.classList.remove('page-one-only', 'is-fog-locked');
+            window.requestAnimationFrame(() => {
+              page3Target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            return;
+          }
+
           page1Scene.classList.add('is-exiting-to-page2');
           window.setTimeout(() => {
             page1Scene.classList.add('is-page2');
