@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const staticDrops = [];
       const waterDrops = [];
       const wetSources = [];
-      let dripBudget = 3;
+      let dripBudget = 2;
       if (ctx && maskCtx && fogTextureCtx) document.body.classList.add('is-fog-locked');
 
       const random = (seed) => {
@@ -295,41 +295,48 @@ document.addEventListener('DOMContentLoaded', () => {
         maskCtx.restore();
       };
 
-      const addWetSource = (x, y, radius) => {
+      const addWetSource = (x, y, radius, seed = Math.random()) => {
         if (!width || !height) return;
 
+        const edgeAngle = Math.PI * (0.12 + random(seed * 1000 + 17) * 0.76);
+        const edgeRadius = radius * (0.82 + random(seed * 1000 + 31) * 0.16);
+        const edgeX = x + Math.cos(edgeAngle) * edgeRadius;
+        const edgeY = y + Math.sin(edgeAngle) * edgeRadius;
+
         wetSources.push({
-          x,
-          y,
-          radius,
+          x: Math.min(width, Math.max(0, edgeX)),
+          y: Math.min(height, Math.max(0, edgeY)),
+          radius: radius * 0.45,
           age: 0,
-          life: 5.5 + Math.random() * 3,
+          life: 7 + Math.random() * 4,
         });
 
-        if (wetSources.length > 90) {
-          wetSources.splice(0, wetSources.length - 90);
+        if (wetSources.length > 32) {
+          wetSources.splice(0, wetSources.length - 32);
         }
       };
 
       const spawnWaterDrop = (source) => {
-        if (waterDrops.length >= 3 || dripBudget <= 0 || !width || !height || !source) return;
+        if (waterDrops.length >= 2 || dripBudget <= 0 || !width || !height || !source) return;
 
         const seed = Math.random() * 1000;
         const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * source.radius * 0.34;
-        const r = (1.2 + Math.random() * 3.4) * dpr;
+        const distance = Math.random() * source.radius * 0.2;
+        const r = (1.4 + Math.random() * 3.1) * dpr;
         dripBudget -= 1;
         waterDrops.push({
           x: source.x + Math.cos(angle) * distance,
-          y: source.y + Math.sin(angle) * distance * 0.38,
+          y: source.y + Math.sin(angle) * distance * 0.25,
           r,
           vx: 0,
-          vy: (1.6 + Math.random() * 7.4) * dpr,
+          vy: (0.45 + Math.random() * 2.1) * dpr,
           seed,
           age: 0,
           wobble: Math.random() * Math.PI * 2,
-          stuck: 0.65 + Math.random() * 1.15,
+          stuck: 1.05 + Math.random() * 1.7,
           trail: 0,
+          drift: (0.8 + Math.random() * 1.9) * dpr,
+          driftRate: 1.4 + Math.random() * 1.8,
         });
       };
 
@@ -343,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        const spawnRate = isFogDissolving || !wetSources.length || dripBudget <= 0 ? 0 : Math.min(0.9, 0.18 + wetSources.length * 0.012);
+        const spawnRate = isFogDissolving || !wetSources.length || dripBudget <= 0 ? 0 : Math.min(0.34, 0.08 + wetSources.length * 0.006);
         if (Math.random() < dt * spawnRate) {
           const source = wetSources[Math.floor(Math.random() * wetSources.length)];
           spawnWaterDrop(source);
@@ -357,13 +364,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const wasStuck = drop.stuck > 0;
           if (wasStuck) {
             drop.stuck -= dt;
-            drop.r += 0.1 * dpr * dt;
+            drop.r += 0.04 * dpr * dt;
           } else {
-            drop.vy += (13 + drop.r * 4.8) * dpr * dt;
-            drop.vy = Math.min(drop.vy, (28 + drop.r * 7.5) * dpr);
+            drop.vy += (3.8 + drop.r * 1.7) * dpr * dt;
+            drop.vy = Math.min(drop.vy, (8.5 + drop.r * 3.2) * dpr);
           }
 
-          drop.vx = Math.sin(drop.wobble + time * 0.0018 + drop.seed) * 1.6 * dpr;
+          drop.vx = Math.sin(drop.wobble + time * 0.001 * drop.driftRate + drop.seed) * drop.drift;
 
           const prevX = drop.x;
           const prevY = drop.y;
@@ -386,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
           }
 
-          drop.r -= distance * 0.0045;
+          drop.r -= distance * 0.0022;
 
           if (drop.r < 0.7 * dpr || drop.y > height + 28 * dpr || drop.x < -30 * dpr || drop.x > width + 30 * dpr) {
             waterDrops.splice(i, 1);
@@ -488,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         waterDrops.length = 0;
         wetSources.length = 0;
-        dripBudget = 3;
+        dripBudget = 2;
         seedFogTexture();
         buildFogTexture();
         renderFogTexture();
@@ -528,11 +535,11 @@ document.addEventListener('DOMContentLoaded', () => {
               radius,
               0.22,
             );
-            if (step % 2 === 0) addWetSource(x, y, radius);
+            if (step % 4 === 0) addWetSource(x, y, radius, step + point.x * 0.01 + point.y * 0.02);
           }
         } else {
           eraseMaskAt(point.x, point.y, radius, 0.22);
-          addWetSource(point.x, point.y, radius);
+          addWetSource(point.x, point.y, radius, point.x * 0.01 + point.y * 0.02);
         }
 
         const lastOrigin = dissolveOrigins[dissolveOrigins.length - 1];
