@@ -24,23 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const page3PhotoNext = document.querySelector('.page3-photo-next');
   const page3Count = document.querySelector('.page3-count');
   const backgroundMusic = document.getElementById('background-music');
-  const musicToggle = document.querySelector('.music-toggle');
-  const pageBackButton = document.querySelector('.page-control-back');
-  const pageNextButton = document.querySelector('.page-control-next');
-  const firstFigmaSection = document.querySelector('.figma-section');
+  const musicToggles = document.querySelectorAll('.music-toggle');
+  const pageControlButtons = document.querySelectorAll('[data-control-action]');
   let resetPageOneFog = null;
+  let activatePage2 = null;
   let musicWasManuallyPaused = false;
 
   const setMusicState = (isPlaying) => {
-    if (!musicToggle) return;
-
-    musicToggle.setAttribute('aria-pressed', String(isPlaying));
-    musicToggle.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
-    musicToggle.classList.toggle('is-user-paused', !isPlaying && musicWasManuallyPaused);
+    musicToggles.forEach((toggle) => {
+      toggle.setAttribute('aria-pressed', String(isPlaying));
+      toggle.setAttribute('aria-label', isPlaying ? 'Pause background music' : 'Play background music');
+      toggle.classList.toggle('is-user-paused', !isPlaying && musicWasManuallyPaused);
+    });
   };
 
   const playBackgroundMusic = async ({ userInitiated = false } = {}) => {
-    if (!backgroundMusic || !musicToggle) return false;
+    if (!backgroundMusic || !musicToggles.length) return false;
     if (musicWasManuallyPaused && !userInitiated) return false;
 
     try {
@@ -60,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setMusicState(false);
   };
 
-  if (backgroundMusic && musicToggle) {
-    musicToggle.addEventListener('click', (event) => {
+  if (backgroundMusic && musicToggles.length) {
+    musicToggles.forEach((toggle) => toggle.addEventListener('click', (event) => {
       event.stopPropagation();
       if (backgroundMusic.paused) {
         musicWasManuallyPaused = false;
@@ -69,30 +68,47 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         pauseBackgroundMusic({ userInitiated: true });
       }
-    });
+    }));
   }
 
-  if (pageBackButton) {
-    pageBackButton.addEventListener('click', (event) => {
+  pageControlButtons.forEach((button) => {
+    button.addEventListener('click', (event) => {
       event.stopPropagation();
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      document.body.classList.add('page-one-only');
-      pauseBackgroundMusic();
-      musicWasManuallyPaused = false;
-      setMusicState(false);
-      resetPageOneFog?.();
-    });
-  }
+      const action = button.dataset.controlAction;
 
-  if (pageNextButton) {
-    pageNextButton.addEventListener('click', (event) => {
-      event.stopPropagation();
-      document.body.classList.remove('page-one-only', 'is-fog-locked');
-      window.requestAnimationFrame(() => {
-        firstFigmaSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      if (action === 'fog') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        document.body.classList.add('page-one-only');
+        pauseBackgroundMusic();
+        musicWasManuallyPaused = false;
+        setMusicState(false);
+        resetPageOneFog?.();
+        return;
+      }
+
+      if (action === 'next') {
+        const target = button.dataset.target ? document.querySelector(button.dataset.target) : null;
+        const isPageOneNext = target?.id === 'page2' && page1Scene;
+
+        if (isPageOneNext) {
+          page1Scene.classList.add('is-exiting-to-page2');
+          window.setTimeout(() => {
+            document.body.classList.remove('page-one-only', 'is-fog-locked');
+            activatePage2?.();
+            window.requestAnimationFrame(() => {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+          }, 620);
+          return;
+        }
+
+        document.body.classList.remove('page-one-only', 'is-fog-locked');
+        window.requestAnimationFrame(() => {
+          target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
     });
-  }
+  });
 
   if (page1Scene) {
     const fogCanvas = page1Scene.querySelector('.page1-fog-canvas');
@@ -284,9 +300,9 @@ document.addEventListener('DOMContentLoaded', () => {
           page1Scene.classList.remove('is-fog-dissolving');
           page1Scene.classList.add('is-fog-cleared', 'is-revealed');
           document.body.classList.remove('is-fog-locked');
-          playBackgroundMusic();
           window.setTimeout(() => {
             page1Scene.classList.add('is-motion-ready');
+            playBackgroundMusic();
           }, 1250);
         };
 
@@ -400,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hasStartedReveal = false;
         dissolveOrigins.length = 0;
         revealedCells.clear();
-        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready');
+        page1Scene.classList.remove('is-fog-dissolving', 'is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-exiting-to-page2');
         document.body.classList.add('is-fog-locked');
         resizeFog();
       };
@@ -563,14 +579,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return true;
     };
 
+    activatePage2 = () => {
+      page2Scene.classList.remove('is-motion-ready');
+      page2Scene.classList.add('is-active');
+      loadPage2Video().then((isReady) => {
+        if (isReady) page2Video.play().catch(() => {});
+      });
+      window.setTimeout(() => {
+        page2Scene.classList.add('is-motion-ready');
+      }, 950);
+    };
+
     const videoObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          loadPage2Video().then((isReady) => {
-            if (isReady) page2Video.play().catch(() => {});
-          });
+          activatePage2?.();
         } else {
           page2Video.pause();
+          page2Scene.classList.remove('is-active', 'is-motion-ready');
         }
       });
     }, { threshold: 0.55 });
