@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fogTextureCanvas = document.createElement('canvas');
       const fogTextureCtx = fogTextureCanvas.getContext('2d', { alpha: true });
       if (!ctx || !maskCtx || !fogTextureCtx) {
-        page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready');
+        page1Scene.classList.add('is-fog-cleared', 'is-revealed');
         document.body.classList.remove('is-fog-locked');
       }
       let dpr = 1;
@@ -71,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
       let revealRows = 0;
       let revealTotal = 0;
       let fogFrame = null;
-      let lastFogTime = 0;
       let isFogDissolving = false;
       let dissolveStart = 0;
       let dissolveSources = [];
@@ -81,95 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const fogSpecks = [];
       const fogWisps = [];
       const staticDrops = [];
-      const waterDrops = [];
-      const wetSources = [];
-      let dripBudget = 2;
       if (ctx && maskCtx && fogTextureCtx) document.body.classList.add('is-fog-locked');
 
       const random = (seed) => {
         const x = Math.sin(seed * 999) * 10000;
         return x - Math.floor(x);
-      };
-
-      const drawDrop = (x, y, radius, seed, alpha, stretchBoost = 0) => {
-        const stretch = 1 + random(seed + 1) * 0.65;
-        const wobble = (random(seed + 2) - 0.5) * radius * 0.35;
-        const trailLength = radius * (1.2 + random(seed + 3) * 3.4);
-        const hasTrail = radius > 7 * dpr && random(seed + 4) > 0.28;
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-
-        if (hasTrail) {
-          const trail = ctx.createLinearGradient(x, y + radius * 0.35, x + wobble, y + trailLength);
-          trail.addColorStop(0, 'rgba(255,255,255,0.34)');
-          trail.addColorStop(0.42, 'rgba(176,190,178,0.16)');
-          trail.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.strokeStyle = trail;
-          ctx.lineWidth = Math.max(1, radius * 0.18);
-          ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.moveTo(x, y + radius * 0.45);
-          ctx.bezierCurveTo(
-            x + wobble * 0.35,
-            y + trailLength * 0.34,
-            x + wobble,
-            y + trailLength * 0.68,
-            x + wobble * 0.5,
-            y + trailLength,
-          );
-          ctx.stroke();
-        }
-
-        const drop = ctx.createRadialGradient(
-          x - radius * 0.33,
-          y - radius * 0.42,
-          radius * 0.08,
-          x,
-          y + radius * 0.12,
-          radius * 1.24,
-        );
-        drop.addColorStop(0, 'rgba(255,255,255,0.72)');
-        drop.addColorStop(0.2, 'rgba(240,247,244,0.42)');
-        drop.addColorStop(0.62, 'rgba(124,144,132,0.22)');
-        drop.addColorStop(0.82, 'rgba(42,66,45,0.18)');
-        drop.addColorStop(1, 'rgba(255,255,255,0)');
-
-        ctx.fillStyle = drop;
-        ctx.beginPath();
-        ctx.ellipse(x, y, radius * 0.82, radius * (stretch + stretchBoost), 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.globalAlpha = alpha * 0.55;
-        ctx.strokeStyle = 'rgba(255,255,255,0.58)';
-        ctx.lineWidth = Math.max(0.7, radius * 0.08);
-        ctx.beginPath();
-        ctx.ellipse(
-          x - radius * 0.14,
-          y - radius * 0.12,
-          radius * 0.55,
-          radius * (stretch + stretchBoost) * 0.78,
-          -0.08,
-          Math.PI * 1.05,
-          Math.PI * 1.8,
-        );
-        ctx.stroke();
-
-        ctx.globalAlpha = alpha * 0.7;
-        ctx.fillStyle = 'rgba(255,255,255,0.62)';
-        ctx.beginPath();
-        ctx.ellipse(
-          x - radius * 0.28,
-          y - radius * 0.42,
-          Math.max(0.9, radius * 0.13),
-          Math.max(0.7, radius * 0.08),
-          -0.45,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-
-        ctx.restore();
       };
 
       const drawMistBead = (targetCtx, x, y, radius, seed, alpha) => {
@@ -295,112 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
         maskCtx.restore();
       };
 
-      const addWetSource = (x, y, radius, seed = Math.random()) => {
-        if (!width || !height) return;
-
-        const edgeAngle = Math.PI * (0.12 + random(seed * 1000 + 17) * 0.76);
-        const edgeRadius = radius * (0.82 + random(seed * 1000 + 31) * 0.16);
-        const edgeX = x + Math.cos(edgeAngle) * edgeRadius;
-        const edgeY = y + Math.sin(edgeAngle) * edgeRadius;
-
-        wetSources.push({
-          x: Math.min(width, Math.max(0, edgeX)),
-          y: Math.min(height, Math.max(0, edgeY)),
-          radius: radius * 0.45,
-          age: 0,
-          life: 7 + Math.random() * 4,
-        });
-
-        if (wetSources.length > 32) {
-          wetSources.splice(0, wetSources.length - 32);
-        }
-      };
-
-      const spawnWaterDrop = (source) => {
-        if (waterDrops.length >= 2 || dripBudget <= 0 || !width || !height || !source) return;
-
-        const seed = Math.random() * 1000;
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * source.radius * 0.2;
-        const r = (1.4 + Math.random() * 3.1) * dpr;
-        dripBudget -= 1;
-        waterDrops.push({
-          x: source.x + Math.cos(angle) * distance,
-          y: source.y + Math.sin(angle) * distance * 0.25,
-          r,
-          vx: 0,
-          vy: (0.45 + Math.random() * 2.1) * dpr,
-          seed,
-          age: 0,
-          wobble: Math.random() * Math.PI * 2,
-          stuck: 1.05 + Math.random() * 1.7,
-          trail: 0,
-          drift: (0.8 + Math.random() * 1.9) * dpr,
-          driftRate: 1.4 + Math.random() * 1.8,
-        });
-      };
-
-      const updateWaterDrops = (dt, time) => {
-        if (!maskCtx || isFogCleared) return;
-
-        for (let i = wetSources.length - 1; i >= 0; i--) {
-          wetSources[i].age += dt;
-          if (wetSources[i].age > wetSources[i].life) {
-            wetSources.splice(i, 1);
-          }
-        }
-
-        const spawnRate = isFogDissolving || !wetSources.length || dripBudget <= 0 ? 0 : Math.min(0.34, 0.08 + wetSources.length * 0.006);
-        if (Math.random() < dt * spawnRate) {
-          const source = wetSources[Math.floor(Math.random() * wetSources.length)];
-          spawnWaterDrop(source);
-        }
-
-        for (let i = waterDrops.length - 1; i >= 0; i--) {
-          const drop = waterDrops[i];
-          drop.age += dt;
-          drop.wobble += dt * 3.2;
-
-          const wasStuck = drop.stuck > 0;
-          if (wasStuck) {
-            drop.stuck -= dt;
-            drop.r += 0.04 * dpr * dt;
-          } else {
-            drop.vy += (3.8 + drop.r * 1.7) * dpr * dt;
-            drop.vy = Math.min(drop.vy, (8.5 + drop.r * 3.2) * dpr);
-          }
-
-          drop.vx = Math.sin(drop.wobble + time * 0.001 * drop.driftRate + drop.seed) * drop.drift;
-
-          const prevX = drop.x;
-          const prevY = drop.y;
-          drop.x += drop.vx * dt;
-          drop.y += drop.vy * dt;
-
-          const distance = Math.hypot(drop.x - prevX, drop.y - prevY);
-          drop.trail += distance;
-          const trailRadius = Math.max(0.65 * dpr, drop.r * 0.36);
-          const step = Math.max(1.1 * dpr, trailRadius);
-
-          while (drop.trail > step) {
-            drop.trail -= step;
-            const ratio = distance ? drop.trail / distance : 0;
-            eraseMaskAt(
-              drop.x - (drop.x - prevX) * ratio,
-              drop.y - (drop.y - prevY) * ratio,
-              trailRadius,
-              0.08,
-            );
-          }
-
-          drop.r -= distance * 0.0022;
-
-          if (drop.r < 0.7 * dpr || drop.y > height + 28 * dpr || drop.x < -30 * dpr || drop.x > width + 30 * dpr) {
-            waterDrops.splice(i, 1);
-          }
-        }
-      };
-
       const renderFogTexture = (time = 0) => {
         if (!ctx || !maskCtx || !width || !height) return;
 
@@ -413,20 +222,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.globalAlpha = 1;
         ctx.drawImage(maskCanvas, 0, 0);
         ctx.restore();
-
-        waterDrops.forEach((drop) => {
-          const stretch = Math.min(drop.vy / (90 * dpr), 0.45);
-          drawDrop(drop.x, drop.y, drop.r, drop.seed, Math.min(0.34, 0.1 + drop.age * 0.55), stretch);
-        });
       };
 
       const startFogLoop = () => {
         if (fogFrame || !ctx || !maskCtx) return;
 
         const tick = (time) => {
-          const dt = lastFogTime ? Math.min(0.05, (time - lastFogTime) / 1000) : 0.016;
-          lastFogTime = time;
-
           if (isFogDissolving && dissolveStart) {
             const elapsed = Math.min(1, (time - dissolveStart) / fogDissolveMs);
             const eased = 1 - (1 - elapsed) ** 3;
@@ -445,20 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
               ctx.clearRect(0, 0, width, height);
               maskCtx.clearRect(0, 0, width, height);
               page1Scene.classList.remove('is-fog-dissolving');
-              page1Scene.classList.add('is-fog-cleared');
+              page1Scene.classList.add('is-fog-cleared', 'is-revealed');
               document.body.classList.remove('is-fog-locked');
-              window.setTimeout(() => {
-                page1Scene.classList.add('is-revealed');
-              }, 500);
-              window.setTimeout(() => {
-                page1Scene.classList.add('is-motion-ready');
-              }, 1550);
               fogFrame = null;
               return;
             }
           }
 
-          updateWaterDrops(dt, time);
           renderFogTexture(time);
 
           fogFrame = window.requestAnimationFrame(tick);
@@ -493,13 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
           maskCtx.fillStyle = '#fff';
           maskCtx.fillRect(0, 0, width, height);
         }
-        waterDrops.length = 0;
-        wetSources.length = 0;
-        dripBudget = 2;
         seedFogTexture();
         buildFogTexture();
         renderFogTexture();
-        startFogLoop();
       };
 
       const canvasPoint = (event) => {
@@ -535,11 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
               radius,
               0.22,
             );
-            if (step % 4 === 0) addWetSource(x, y, radius, step + point.x * 0.01 + point.y * 0.02);
           }
         } else {
           eraseMaskAt(point.x, point.y, radius, 0.22);
-          addWetSource(point.x, point.y, radius, point.x * 0.01 + point.y * 0.02);
         }
 
         const lastOrigin = dissolveOrigins[dissolveOrigins.length - 1];
