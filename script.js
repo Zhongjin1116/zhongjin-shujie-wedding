@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
   const PAGE_TRANSITION_MS = 780;
-  const PAGE2_START_DELAY_MS = 620;
   const CAMERA_ENTER_MS = 950;
   let viewportFrame = null;
   const setAppViewportHeight = () => {
@@ -212,10 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           page1Scene.classList.add('is-exiting-to-page2');
+          activatePage2?.();
           window.setTimeout(() => {
             page1Scene.classList.add('is-page2');
-            activatePage2?.();
-          }, PAGE2_START_DELAY_MS);
+          }, PAGE_TRANSITION_MS);
           return;
         }
 
