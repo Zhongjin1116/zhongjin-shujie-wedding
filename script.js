@@ -133,10 +133,23 @@ document.addEventListener('DOMContentLoaded', () => {
       event.stopPropagation();
     });
 
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
+      window.location.href = link.href;
     });
   });
+
+  document.addEventListener('click', (event) => {
+    const rsvpLink = event.target.closest?.('[data-rsvp-link]');
+    if (!rsvpLink) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
+    window.location.href = rsvpLink.href;
+  }, true);
 
   pageControlButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
