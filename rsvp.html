@@ -12,8 +12,8 @@
 <body class="rsvp-page">
 
   <header class="rsvp-header">
-    <a href="index.html" class="back-link">← 返回</a>
-    <p class="rsvp-header-title">许忠锦 & 李姝洁 · 2025.11.13</p>
+    <a href="index.html?state=page3-rsvp" class="back-link" id="rsvp-back-link">← 返回</a>
+    <p class="rsvp-header-title">许忠锦 & 李姝洁 · 2026.11.13</p>
   </header>
 
   <main class="rsvp-main">
@@ -22,69 +22,57 @@
       <p class="form-sub">感谢您抽空填写，请在 10 月 31 日前提交。</p>
 
       <div id="form-container">
-        <!-- Name -->
         <div class="field-group">
-          <label class="field-label" for="name">您的姓名 <span class="required">*</span></label>
+          <label class="field-label" for="name">姓名 <span class="required">*</span></label>
           <input class="field-input" type="text" id="name" placeholder="请输入您的姓名" />
         </div>
 
-        <!-- Attendance -->
         <div class="field-group">
-          <label class="field-label">是否出席 <span class="required">*</span></label>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input type="radio" name="attendance" value="yes" />
-              <span>出席</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="attendance" value="no" />
-              <span>遗憾无法出席</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Guest count (shown only if attending) -->
-        <div class="field-group" id="guest-count-group" style="display:none;">
-          <label class="field-label" for="guest-count">出席人数（包括您本人）</label>
+          <label class="field-label" for="guest-count">出席人数 <span class="required">*</span></label>
           <select class="field-select" id="guest-count">
             <option value="1">1 人</option>
             <option value="2">2 人</option>
             <option value="3">3 人</option>
-            <option value="4">4 人及以上</option>
+            <option value="4">4 人</option>
+            <option value="5">5 人及以上</option>
           </select>
         </div>
 
-        <!-- Dietary -->
-        <div class="field-group" id="dietary-group" style="display:none;">
-          <label class="field-label">饮食忌口</label>
-          <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" name="dietary" value="none" />
-              <span>无忌口</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" name="dietary" value="vegetarian" />
-              <span>素食</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" name="dietary" value="halal" />
-              <span>清真</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" name="dietary" value="seafood" />
-              <span>海鲜过敏</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" name="dietary" value="nut" />
-              <span>坚果过敏</span>
-            </label>
-          </div>
+        <div class="field-group">
+          <label class="field-label" for="guest-names">请填写同行宾客姓名</label>
+          <textarea class="field-textarea compact" id="guest-names" placeholder="如有同行宾客，请填写姓名"></textarea>
         </div>
 
-        <!-- Message -->
         <div class="field-group">
-          <label class="field-label" for="message">留言（可选）</label>
-          <textarea class="field-textarea" id="message" placeholder="写下您对我们的祝福..."></textarea>
+          <label class="field-label" for="has-allergy">是否有忌口或食物过敏</label>
+          <select class="field-select" id="has-allergy">
+            <option value="否">否</option>
+            <option value="是">是</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="allergy-detail">请填写具体的宾客忌口或过敏信息</label>
+          <textarea class="field-textarea compact" id="allergy-detail" placeholder="如有忌口或过敏，请在这里说明"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="needs-lodging">是否需要住宿安排</label>
+          <select class="field-select" id="needs-lodging">
+            <option value="否">否</option>
+            <option value="是">是</option>
+          </select>
+          <p class="field-help">对于外地的宾客，我们会根据您的安排提供一至两晚的住宿。</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="lodging-detail">请填写具体的住宿信息</label>
+          <textarea class="field-textarea compact" id="lodging-detail" placeholder="如需要住宿，请填写人数、到达日期或其他安排"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">*着装要求</label>
+          <p class="field-help">为了能更好地契合婚礼主题，我们希望宾客优先选择柔和、自然的浅色系轻礼服出席。</p>
         </div>
 
         <button class="submit-btn" id="submit-btn" onclick="submitRsvp()">提交回执</button>
@@ -96,36 +84,32 @@
         <div class="success-icon">✦</div>
         <h2 class="success-heading">感谢您的回复！</h2>
         <p class="success-body">我们已收到您的回执，期待在婚礼上见到您。</p>
-        <a href="index.html" class="back-home-link">← 返回邀请函</a>
+        <a href="index.html?state=page3-rsvp" class="back-home-link">← 返回邀请函</a>
       </div>
     </div>
   </main>
 
   <script>
-    // Show/hide fields based on attendance
-    document.querySelectorAll('input[name="attendance"]').forEach(radio => {
-      radio.addEventListener('change', function () {
-        const attending = this.value === 'yes';
-        document.getElementById('guest-count-group').style.display = attending ? 'block' : 'none';
-        document.getElementById('dietary-group').style.display = attending ? 'block' : 'none';
-      });
-    });
-
     async function submitRsvp() {
       const name = document.getElementById('name').value.trim();
-      const attendance = document.querySelector('input[name="attendance"]:checked');
       const errorMsg = document.getElementById('error-msg');
       errorMsg.textContent = '';
 
       if (!name) { errorMsg.textContent = '请填写您的姓名。'; return; }
-      if (!attendance) { errorMsg.textContent = '请选择是否出席。'; return; }
 
-      const attending = attendance.value === 'yes';
-      const guestCount = attending ? document.getElementById('guest-count').value : '0';
-      const dietary = attending
-        ? Array.from(document.querySelectorAll('input[name="dietary"]:checked')).map(c => c.value)
-        : [];
-      const message = document.getElementById('message').value.trim();
+      const attending = true;
+      const guestCount = document.getElementById('guest-count').value;
+      const guestNames = document.getElementById('guest-names').value.trim();
+      const hasAllergy = document.getElementById('has-allergy').value;
+      const allergyDetail = document.getElementById('allergy-detail').value.trim();
+      const needsLodging = document.getElementById('needs-lodging').value;
+      const lodgingDetail = document.getElementById('lodging-detail').value.trim();
+      const dietary = `${hasAllergy}${allergyDetail ? `：${allergyDetail}` : ''}`;
+      const message = [
+        guestNames ? `同行宾客：${guestNames}` : '',
+        `需要住宿：${needsLodging}`,
+        lodgingDetail ? `住宿信息：${lodgingDetail}` : '',
+      ].filter(Boolean).join('\n');
 
       const btn = document.getElementById('submit-btn');
       btn.textContent = '提交中...';

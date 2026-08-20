@@ -541,7 +541,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .figma-type {
-  font-family: var(--font-figma-type);
+  font-family: 'AaGuDianKeBenSongYMB', var(--font-figma-type);
   font-weight: 700;
   font-style: normal;
 }
@@ -960,9 +960,12 @@ a { color: inherit; text-decoration: none; }
 
 .field-label {
   display: block;
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
+  font-family: 'AaGuDianKeBenSongYMB', var(--font-figma-type);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+  margin-bottom: 8px;
+  color: #3f3931;
 }
 
 .required { color: var(--accent); }
@@ -984,6 +987,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 .field-textarea { resize: vertical; min-height: 80px; }
+.field-textarea.compact { min-height: 64px; }
+
+.field-help {
+  margin-top: 8px;
+  color: #3f3931;
+  font-family: var(--font-figma-type);
+  font-size: 11px;
+  line-height: 20px;
+}
 
 .radio-group, .checkbox-group {
   display: flex;

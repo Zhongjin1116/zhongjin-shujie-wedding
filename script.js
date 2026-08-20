@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const musicToggles = document.querySelectorAll('.music-toggle');
   const pageControlButtons = document.querySelectorAll('[data-control-action]');
   const page1Controls = document.querySelector('.page1-controls');
+  const rsvpLinks = document.querySelectorAll('[data-rsvp-link]');
   let resetPageOneFog = null;
   let activatePage2 = null;
   let returnToPageOne = null;
@@ -126,6 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }));
   }
+
+  rsvpLinks.forEach((link) => {
+    link.addEventListener('click', () => {
+      window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
+    });
+  });
 
   pageControlButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
@@ -708,7 +715,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showNextPage3Slide = () => {
       if (page3Index >= page3SlideCount - 1) {
-        window.location.href = 'rsvp.html';
+        window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
+        window.location.href = 'rsvp.html?from=page3';
         return;
       }
 
@@ -787,6 +795,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     setPage3Index(0);
+
+    const shouldRestoreRsvpState = () => {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('state') === 'page3-rsvp'
+        || window.sessionStorage?.getItem('weddingReturnState') === 'page3-rsvp';
+    };
+
+    if (shouldRestoreRsvpState()) {
+      window.sessionStorage?.removeItem('weddingReturnState');
+      document.body.classList.add('page-one-only');
+      document.body.classList.remove('is-fog-locked');
+      page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-page1-settled', 'is-page3');
+      page1Scene.classList.remove('is-exiting-to-page2', 'is-page2', 'is-entering-page3', 'is-returning-to-page1');
+      page3Scene.classList.add('is-active');
+      page3Scene.classList.remove('is-leaving');
+      page3Scene.setAttribute('aria-hidden', 'false');
+      setPage3Index(page3SlideCount - 1);
+      if (window.location.search) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    }
   }
 
 });
