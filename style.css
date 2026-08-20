@@ -85,7 +85,7 @@ a { color: inherit; text-decoration: none; }
 .page1-title {
   position: absolute;
   left: 26.13%;
-  top: 39.66%;
+  top: 36.6%;
   z-index: 2;
   width: 32.27%;
   display: flex;
@@ -98,6 +98,8 @@ a { color: inherit; text-decoration: none; }
   word-break: break-word;
   overflow: visible;
   pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
 }
 
 .page1-title span {
@@ -170,8 +172,19 @@ a { color: inherit; text-decoration: none; }
   animation: page1-extra-sticker-return 0.78s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.page1-scene.is-exiting-to-page2 .page1-title,
-.page1-scene.is-page2 .page1-title,
+.page1-scene.is-exiting-to-page2 .page1-title {
+  animation: page1-title-exit-left 0.95s cubic-bezier(0.6, 0, 0.4, 1) forwards;
+}
+
+.page1-scene.is-page2 .page1-title {
+  opacity: 1;
+  transform: translate3d(-120vw, 2vh, 0);
+}
+
+.page1-scene.is-returning-to-page1 .page1-title {
+  animation: page1-title-return-right 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 .page1-scene.is-entering-page3 .page1-title,
 .page1-scene.is-page3 .page1-title {
   opacity: 0;
@@ -397,6 +410,28 @@ a { color: inherit; text-decoration: none; }
   }
   to {
     transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes page1-title-exit-left {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-120vw, 2vh, 0);
+  }
+}
+
+@keyframes page1-title-return-right {
+  from {
+    opacity: 1;
+    transform: translate3d(-120vw, 2vh, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -971,7 +1006,7 @@ a { color: inherit; text-decoration: none; }
   --font-rsvp: 'AaGuDianKeBenSongYMB', 'Noto Serif SC', serif;
   background: var(--paper);
   font-family: var(--font-rsvp);
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .rsvp-page input,
@@ -1006,7 +1041,7 @@ a { color: inherit; text-decoration: none; }
 .rsvp-main {
   max-width: 560px;
   margin: 0 auto;
-  padding: 76px 24px 120px;
+  padding: 82px 24px 120px;
 }
 
 .form-heading {
@@ -1015,16 +1050,23 @@ a { color: inherit; text-decoration: none; }
   font-weight: 400;
   font-size: 30px;
   line-height: normal;
-  letter-spacing: 0;
+  letter-spacing: 0.12em;
   margin: 0 0 22px;
   color: #1c3a20;
   text-align: center;
 }
 
 .form-sub {
-  font-size: 14px;
+  position: fixed;
+  right: 22px;
+  top: max(22px, calc(env(safe-area-inset-top) + 4px));
+  z-index: 20;
+  font-size: 12px;
+  line-height: 20px;
   color: var(--stone-dark);
-  margin-bottom: 48px;
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .field-group { margin-bottom: 32px; }
@@ -1032,7 +1074,7 @@ a { color: inherit; text-decoration: none; }
 .field-label {
   display: block;
   font-family: var(--font-rsvp);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 20px;
   letter-spacing: 0;
   margin-bottom: 8px;
@@ -1048,7 +1090,7 @@ a { color: inherit; text-decoration: none; }
   background: transparent;
   padding: 10px 4px;
   font-family: var(--font-rsvp);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink);
 }
 
@@ -1057,10 +1099,10 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--stone-dark);
   border-radius: 6px;
   box-shadow: none;
-  padding: 13px 46px 13px 16px;
+  padding: 14px 50px 14px 18px;
   background-color: transparent;
   background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' fill='none' stroke='%23433d34' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-position: right 16px center;
+  background-position: right 18px center;
   background-repeat: no-repeat;
   background-size: 12px 8px;
 }
@@ -1089,9 +1131,9 @@ a { color: inherit; text-decoration: none; }
 
 .field-help {
   margin-top: 8px;
-  color: #3f3931;
+  color: #7d766a;
   font-family: var(--font-rsvp);
-  font-size: 14px;
+  font-size: 12px;
   line-height: 20px;
 }
 
@@ -1124,7 +1166,7 @@ a { color: inherit; text-decoration: none; }
   border: none;
   padding: 16px;
   font-family: var(--font-rsvp);
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 0.1em;
   cursor: pointer;
   transition: opacity 0.2s ease;
