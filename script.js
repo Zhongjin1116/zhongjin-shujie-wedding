@@ -747,6 +747,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let page3PointerId = null;
     let isPage3Transitioning = false;
 
+    const isPointInsideRsvpLink = (x, y) => {
+      const rsvpLink = page3Scene.querySelector('[data-rsvp-link]');
+      if (!rsvpLink) return false;
+
+      const rect = rsvpLink.getBoundingClientRect();
+      const inset = 12;
+      return x >= rect.left - inset
+        && x <= rect.right + inset
+        && y >= rect.top - inset
+        && y <= rect.bottom + inset;
+    };
+
     const setPage3Index = (nextIndex) => {
       page3Index = Math.max(0, Math.min(page3SlideCount - 1, nextIndex));
       page3Scene.style.setProperty('--page3-index', String(page3Index));
@@ -824,6 +836,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const deltaX = event.clientX - page3TouchStartX;
       const deltaY = event.clientY - page3TouchStartY;
       page3PointerId = null;
+
+      if (Math.abs(deltaX) < 12 && Math.abs(deltaY) < 12 && page3Index >= page3SlideCount - 1) {
+        const rsvpLink = page3Scene.querySelector('[data-rsvp-link]');
+        if (rsvpLink && isPointInsideRsvpLink(event.clientX, event.clientY)) {
+          openRsvpFromPage3(rsvpLink, event);
+          return;
+        }
+      }
 
       if (Math.abs(deltaX) < 36 || Math.abs(deltaX) < Math.abs(deltaY) * 1.15) return;
       setPage3Index(page3Index + (deltaX < 0 ? 1 : -1));
