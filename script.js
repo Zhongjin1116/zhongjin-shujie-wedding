@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     link.addEventListener('pointerup', (event) => {
       openRsvpFromPage3(link, event);
-    });
+    }, true);
 
     link.addEventListener('click', (event) => {
       openRsvpFromPage3(link, event);
