@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
           window.setTimeout(() => {
             page1Scene.classList.add('is-motion-ready', 'is-page1-settled');
             playBackgroundMusic({ restart: true });
-          }, 1250);
+          }, 1400);
         };
 
         const isVisibleFogCleared = (radius, eased) => {
