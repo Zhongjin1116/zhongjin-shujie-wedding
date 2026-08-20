@@ -129,6 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   rsvpLinks.forEach((link) => {
+    link.addEventListener('pointerdown', (event) => {
+      event.stopPropagation();
+    });
+
     link.addEventListener('click', () => {
       window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
     });
@@ -808,10 +812,15 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('is-fog-locked');
       page1Scene.classList.add('is-fog-cleared', 'is-revealed', 'is-motion-ready', 'is-page1-settled', 'is-page3');
       page1Scene.classList.remove('is-exiting-to-page2', 'is-page2', 'is-entering-page3', 'is-returning-to-page1');
-      page3Scene.classList.add('is-active');
+      page3Scene.classList.add('is-active', 'is-restoring');
       page3Scene.classList.remove('is-leaving');
       page3Scene.setAttribute('aria-hidden', 'false');
       setPage3Index(page3SlideCount - 1);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          page3Scene.classList.remove('is-restoring');
+        });
+      });
       if (window.location.search) {
         window.history.replaceState(null, '', window.location.pathname);
       }

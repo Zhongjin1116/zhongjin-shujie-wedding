@@ -767,6 +767,10 @@ a { color: inherit; text-decoration: none; }
   will-change: transform;
 }
 
+.page3-inline.is-restoring .page3-track {
+  transition: none;
+}
+
 .page3-inline:not(.is-active) .page3-track {
   transform: translate(112vw, var(--page3-track-y));
 }
@@ -817,7 +821,7 @@ a { color: inherit; text-decoration: none; }
 .page3-rsvp-content {
   left: 50%;
   top: 24.5%;
-  z-index: 3;
+  z-index: 4;
   display: flex;
   width: 51%;
   transform: translateX(-50%);
@@ -828,9 +832,14 @@ a { color: inherit; text-decoration: none; }
   line-height: 1;
   text-align: center;
   white-space: nowrap;
+  pointer-events: auto;
 }
 
 .page3-rsvp-content a {
+  position: relative;
+  z-index: 5;
+  display: inline-block;
+  pointer-events: auto;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -854,6 +863,12 @@ a { color: inherit; text-decoration: none; }
   object-fit: contain;
   transform: rotate(26.13deg);
   transform-origin: 50% 50%;
+}
+
+.page3-slide-photo,
+.page3-rsvp-cat,
+.page3-polaroid-frame {
+  pointer-events: none;
 }
 
 .page4-scene {

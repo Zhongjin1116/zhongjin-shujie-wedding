@@ -18,7 +18,7 @@
 
   <main class="rsvp-main">
     <div class="rsvp-form-wrap">
-      <h1 class="form-heading">婚礼回执</h1>
+      <h1 class="form-heading">RSVP</h1>
       <p class="form-sub">感谢您抽空填写，请在 10 月 31 日前提交。</p>
 
       <div id="form-container">
@@ -75,7 +75,7 @@
           <p class="field-help">为了能更好地契合婚礼主题，我们希望宾客优先选择柔和、自然的浅色系轻礼服出席。</p>
         </div>
 
-        <button class="submit-btn" id="submit-btn" onclick="submitRsvp()">提交回执</button>
+        <button class="submit-btn" id="submit-btn" onclick="submitRsvp()">提交</button>
         <p class="error-msg" id="error-msg"></p>
       </div>
 
@@ -143,7 +143,7 @@
         errorMsg.textContent = e.name === 'AbortError'
           ? '提交超时，请稍后再试。'
           : `提交遇到问题：${e.message}`;
-        btn.textContent = '提交回执';
+        btn.textContent = '提交';
         btn.disabled = false;
       }
     }
