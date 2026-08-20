@@ -94,6 +94,7 @@
 
       const update = () => {
         group.hidden = select.value !== activeValue;
+        select.classList.toggle('is-empty', !select.value);
         select.classList.remove('field-error');
       };
 
@@ -107,7 +108,12 @@
 
     document.querySelectorAll('.field-input, .field-select, .field-textarea').forEach((field) => {
       field.addEventListener('input', () => field.classList.remove('field-error'));
-      field.addEventListener('change', () => field.classList.remove('field-error'));
+      field.addEventListener('change', () => {
+        field.classList.remove('field-error');
+        if (field.matches('.field-select')) {
+          field.classList.toggle('is-empty', !field.value);
+        }
+      });
     });
 
     async function submitRsvp() {
