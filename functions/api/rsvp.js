@@ -26,23 +26,56 @@ export async function onRequestPost(context) {
     return json({ error: 'Invalid JSON' }, 400);
   }
 
-  const { name, attending, guestCount, dietary, message } = body;
+  const {
+    name,
+    hasCompanion,
+    companionNames,
+    hasDietaryNeed,
+    dietaryDetail,
+    needsLodging,
+    lodgingDetail
+  } = body;
 
-  if (!name || typeof attending !== 'boolean') {
+  if (!name || !hasCompanion || !hasDietaryNeed || !needsLodging) {
     return json({ error: 'Missing required fields' }, 400);
+  }
+
+  if (hasCompanion === '有' && !companionNames) {
+    return json({ error: 'Missing companion names' }, 400);
+  }
+
+  if (hasDietaryNeed === '有' && !dietaryDetail) {
+    return json({ error: 'Missing dietary detail' }, 400);
+  }
+
+  if (needsLodging === '需要' && !lodgingDetail) {
+    return json({ error: 'Missing lodging detail' }, 400);
   }
 
   try {
     await env.WEDDING_DB.prepare(
-      `INSERT INTO rsvps (name, attending, guest_count, dietary, message, submitted_at)
-       VALUES (?, ?, ?, ?, ?, ?)`
+      `INSERT INTO rsvps (
+        name,
+        attending,
+        has_companion,
+        companion_names,
+        has_dietary_need,
+        dietary_detail,
+        needs_lodging,
+        lodging_detail,
+        submitted_at
+      )
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         name.slice(0, 200),
-        attending ? 1 : 0,
-        parseInt(guestCount, 10) || 0,
-        (dietary || '').slice(0, 200),
-        (message || '').slice(0, 1000),
+        1,
+        hasCompanion.slice(0, 20),
+        (companionNames || '').slice(0, 500),
+        hasDietaryNeed.slice(0, 20),
+        (dietaryDetail || '').slice(0, 500),
+        needsLodging.slice(0, 20),
+        (lodgingDetail || '').slice(0, 500),
         new Date().toISOString()
       )
       .run();

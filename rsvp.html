@@ -20,13 +20,14 @@
 
       <div id="form-container">
         <div class="field-group">
-          <label class="field-label" for="name">您的姓名 <span class="required">*</span></label>
+          <label class="field-label" for="name">您的姓名</label>
           <input class="field-input" type="text" id="name" placeholder="请输入您的姓名" />
         </div>
 
         <div class="field-group">
           <label class="field-label" for="has-companion">是否有同行宾客？</label>
           <select class="field-select" id="has-companion">
+            <option value="">请选择</option>
             <option value="无">无</option>
             <option value="有">有</option>
           </select>
@@ -40,6 +41,7 @@
         <div class="field-group">
           <label class="field-label" for="has-allergy">是否有食物过敏或特殊饮食需求？</label>
           <select class="field-select" id="has-allergy">
+            <option value="">请选择</option>
             <option value="无">无</option>
             <option value="有">有</option>
           </select>
@@ -53,6 +55,7 @@
         <div class="field-group">
           <label class="field-label" for="needs-lodging">是否需要我们安排住宿？</label>
           <select class="field-select" id="needs-lodging">
+            <option value="">请选择</option>
             <option value="不需要">不需要</option>
             <option value="需要">需要</option>
           </select>
@@ -91,6 +94,7 @@
 
       const update = () => {
         group.hidden = select.value !== activeValue;
+        select.classList.remove('field-error');
       };
 
       select.addEventListener('change', update);
@@ -101,28 +105,48 @@
     bindConditionalSelect('has-allergy', '有', 'allergy-detail-group');
     bindConditionalSelect('needs-lodging', '需要', 'lodging-detail-group');
 
+    document.querySelectorAll('.field-input, .field-select, .field-textarea').forEach((field) => {
+      field.addEventListener('input', () => field.classList.remove('field-error'));
+      field.addEventListener('change', () => field.classList.remove('field-error'));
+    });
+
     async function submitRsvp() {
-      const name = document.getElementById('name').value.trim();
+      const nameInput = document.getElementById('name');
+      const companionSelect = document.getElementById('has-companion');
+      const allergySelect = document.getElementById('has-allergy');
+      const lodgingSelect = document.getElementById('needs-lodging');
+      const guestNamesInput = document.getElementById('guest-names');
+      const allergyDetailInput = document.getElementById('allergy-detail');
+      const lodgingDetailInput = document.getElementById('lodging-detail');
+      const fields = [nameInput, companionSelect, allergySelect, lodgingSelect, guestNamesInput, allergyDetailInput, lodgingDetailInput];
+      const name = nameInput.value.trim();
       const errorMsg = document.getElementById('error-msg');
       errorMsg.textContent = '';
 
-      if (!name) { errorMsg.textContent = '请填写您的姓名。'; return; }
-
-      const attending = true;
       const hasCompanion = selectedValue('has-companion');
-      const guestNames = document.getElementById('guest-names').value.trim();
+      const guestNames = guestNamesInput.value.trim();
       const hasAllergy = selectedValue('has-allergy');
-      const allergyDetail = document.getElementById('allergy-detail').value.trim();
+      const allergyDetail = allergyDetailInput.value.trim();
       const needsLodging = selectedValue('needs-lodging');
-      const lodgingDetail = document.getElementById('lodging-detail').value.trim();
-      const guestCount = hasCompanion === '有' ? 2 : 1;
-      const dietary = `${hasAllergy}${allergyDetail ? `：${allergyDetail}` : ''}`;
-      const message = [
-        `同行宾客：${hasCompanion}`,
-        guestNames ? `同行宾客姓名：${guestNames}` : '',
-        `住宿安排：${needsLodging}`,
-        lodgingDetail ? `住宿信息：${lodgingDetail}` : '',
-      ].filter(Boolean).join('\n');
+      const lodgingDetail = lodgingDetailInput.value.trim();
+      const invalidFields = [];
+
+      fields.forEach((field) => field.classList.remove('field-error'));
+      if (!name) invalidFields.push(nameInput);
+      if (!hasCompanion) invalidFields.push(companionSelect);
+      if (hasCompanion === '有' && !guestNames) invalidFields.push(guestNamesInput);
+      if (!hasAllergy) invalidFields.push(allergySelect);
+      if (hasAllergy === '有' && !allergyDetail) invalidFields.push(allergyDetailInput);
+      if (!needsLodging) invalidFields.push(lodgingSelect);
+      if (needsLodging === '需要' && !lodgingDetail) invalidFields.push(lodgingDetailInput);
+
+      if (invalidFields.length) {
+        invalidFields.forEach((field) => field.classList.add('field-error'));
+        errorMsg.textContent = '请完整填写标红的问题。';
+        invalidFields[0].focus({ preventScroll: true });
+        invalidFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
 
       const btn = document.getElementById('submit-btn');
       btn.textContent = '提交中...';
@@ -135,7 +159,15 @@
         const res = await fetch('/api/rsvp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, attending, guestCount, dietary, message }),
+          body: JSON.stringify({
+            name,
+            hasCompanion,
+            companionNames: guestNames,
+            hasDietaryNeed: hasAllergy,
+            dietaryDetail: allergyDetail,
+            needsLodging,
+            lodgingDetail
+          }),
           signal: controller.signal
         });
         clearTimeout(timeoutId);
