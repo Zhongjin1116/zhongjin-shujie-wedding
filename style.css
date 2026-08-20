@@ -832,7 +832,9 @@ a { color: inherit; text-decoration: none; }
   line-height: 1;
   text-align: center;
   white-space: nowrap;
+  cursor: pointer;
   pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .page3-rsvp-content a {

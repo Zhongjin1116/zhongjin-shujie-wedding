@@ -128,27 +128,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
+  const getRsvpHref = (target) => {
+    if (!target) return '';
+    if (target.href) return target.href;
+    if (target.dataset?.rsvpHref) return target.dataset.rsvpHref;
+    return target.querySelector?.('a[href]')?.href || 'rsvp.html?from=page3';
+  };
+
+  const openRsvpFromPage3 = (target, event) => {
+    const rsvpLink = target.closest?.('[data-rsvp-link]');
+    if (!rsvpLink) return false;
+
+    event?.preventDefault();
+    event?.stopPropagation();
+    window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
+    window.location.href = getRsvpHref(rsvpLink);
+    return true;
+  };
+
   rsvpLinks.forEach((link) => {
     link.addEventListener('pointerdown', (event) => {
       event.stopPropagation();
     });
 
+    link.addEventListener('pointerup', (event) => {
+      openRsvpFromPage3(link, event);
+    });
+
     link.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
-      window.location.href = link.href;
+      openRsvpFromPage3(link, event);
+    });
+
+    link.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      openRsvpFromPage3(link, event);
     });
   });
 
-  document.addEventListener('click', (event) => {
-    const rsvpLink = event.target.closest?.('[data-rsvp-link]');
-    if (!rsvpLink) return;
+  document.addEventListener('pointerup', (event) => {
+    openRsvpFromPage3(event.target, event);
+  }, true);
 
-    event.preventDefault();
-    event.stopPropagation();
-    window.sessionStorage?.setItem('weddingReturnState', 'page3-rsvp');
-    window.location.href = rsvpLink.href;
+  document.addEventListener('click', (event) => {
+    openRsvpFromPage3(event.target, event);
   }, true);
 
   pageControlButtons.forEach((button) => {
