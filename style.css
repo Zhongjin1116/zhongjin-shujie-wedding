@@ -14,7 +14,7 @@
   --accent: #8a7a5c;
   --font-display: 'Cormorant Garamond', 'Noto Serif SC', serif;
   --font-body: 'Noto Sans SC', -apple-system, sans-serif;
-  --font-figma-type: 'AaGuDianKeBenSongYMB', 'Noto Serif SC', serif;
+  --font-figma-type: 'Anonymous Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
   --max-width: 720px;
   --app-height: 100dvh;
 }
@@ -550,7 +550,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .figma-type {
-  font-family: 'AaGuDianKeBenSongYMB', var(--font-figma-type);
+  font-family: var(--font-figma-type);
   font-weight: 700;
   font-style: normal;
 }
@@ -967,7 +967,18 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---------- RSVP page ---------- */
-.rsvp-page { background: var(--paper); }
+.rsvp-page {
+  --font-rsvp: 'AaGuDianKeBenSongYMB', 'Noto Serif SC', serif;
+  background: var(--paper);
+  font-family: var(--font-rsvp);
+}
+
+.rsvp-page input,
+.rsvp-page select,
+.rsvp-page textarea,
+.rsvp-page button {
+  font-family: var(--font-rsvp);
+}
 
 .back-link {
   font-size: 13px;
@@ -998,7 +1009,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .form-heading {
-  font-family: 'AaGuDianKeBenSongYMB', var(--font-figma-type);
+  font-family: var(--font-rsvp);
   font-style: normal;
   font-weight: 400;
   font-size: 24px;
@@ -1019,7 +1030,7 @@ a { color: inherit; text-decoration: none; }
 
 .field-label {
   display: block;
-  font-family: 'AaGuDianKeBenSongYMB', var(--font-figma-type);
+  font-family: var(--font-rsvp);
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0;
@@ -1035,7 +1046,7 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid var(--stone-dark);
   background: transparent;
   padding: 10px 4px;
-  font-family: var(--font-body);
+  font-family: var(--font-rsvp);
   font-size: 15px;
   color: var(--ink);
 }
@@ -1078,7 +1089,7 @@ a { color: inherit; text-decoration: none; }
 .field-help {
   margin-top: 8px;
   color: #3f3931;
-  font-family: var(--font-figma-type);
+  font-family: var(--font-rsvp);
   font-size: 11px;
   line-height: 20px;
 }
