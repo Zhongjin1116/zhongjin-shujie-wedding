@@ -151,6 +151,13 @@ a { color: inherit; text-decoration: none; }
   animation: page1-butterfly-center-motion 2.5s linear infinite;
 }
 
+.page1-scene.is-exiting-to-page2 .page1-butterfly-left,
+.page1-scene.is-page2 .page1-butterfly-left {
+  opacity: 1;
+  animation: none;
+  transform: translate(0, 0) scale(1);
+}
+
 .page1-scene.is-exiting-to-page2 .page1-strawberry-left,
 .page1-scene.is-exiting-to-page2 .page1-deer,
 .page1-scene.is-exiting-to-page2 .page1-butterfly-center,
@@ -192,9 +199,11 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page1-scene.is-exiting-to-page2 .page1-strawberry-left img,
+.page1-scene.is-exiting-to-page2 .page1-butterfly-left img,
 .page1-scene.is-exiting-to-page2 .page1-deer img,
 .page1-scene.is-exiting-to-page2 .page1-butterfly-center img,
 .page1-scene.is-page2 .page1-strawberry-left img,
+.page1-scene.is-page2 .page1-butterfly-left img,
 .page1-scene.is-page2 .page1-deer img,
 .page1-scene.is-page2 .page1-butterfly-center img,
 .page1-scene.is-entering-page3 .page1-strawberry-left img,
@@ -1094,6 +1103,12 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-rsvp);
   font-size: 16px;
   color: var(--ink);
+}
+
+.field-input::placeholder,
+.field-textarea::placeholder {
+  color: #7d766a;
+  opacity: 1;
 }
 
 .field-select.is-empty {
