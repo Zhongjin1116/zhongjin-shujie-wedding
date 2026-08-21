@@ -68,6 +68,17 @@
           <textarea class="field-textarea compact" id="lodging-detail" rows="1" placeholder="示例：2 人，11 月 12 日入住，11 月 14 日离店"></textarea>
         </div>
 
+        <div class="field-group">
+          <label class="field-label" for="contact-phone">联系电话</label>
+          <input class="field-input" type="tel" id="contact-phone" inputmode="numeric" autocomplete="tel" placeholder="请输入 11 位手机号码" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="mailing-address">收信地址</label>
+          <p class="field-help">方便我们为您寄送纸质请柬。</p>
+          <textarea class="field-textarea compact" id="mailing-address" rows="1" placeholder="请填写完整收信地址"></textarea>
+        </div>
+
         <div class="field-group dress-code-group">
           <div class="dress-code-head">
             <p class="dress-code-title">Dress Code / 着装建议</p>
@@ -138,7 +149,9 @@
       const guestNamesInput = document.getElementById('guest-names');
       const allergyDetailInput = document.getElementById('allergy-detail');
       const lodgingDetailInput = document.getElementById('lodging-detail');
-      const fields = [nameInput, companionSelect, allergySelect, lodgingSelect, guestNamesInput, allergyDetailInput, lodgingDetailInput];
+      const contactPhoneInput = document.getElementById('contact-phone');
+      const mailingAddressInput = document.getElementById('mailing-address');
+      const fields = [nameInput, companionSelect, allergySelect, lodgingSelect, guestNamesInput, allergyDetailInput, lodgingDetailInput, contactPhoneInput, mailingAddressInput];
       const name = nameInput.value.trim();
       const errorMsg = document.getElementById('error-msg');
       errorMsg.textContent = '';
@@ -149,6 +162,8 @@
       const allergyDetail = allergyDetailInput.value.trim();
       const needsLodging = selectedValue('needs-lodging');
       const lodgingDetail = lodgingDetailInput.value.trim();
+      const contactPhone = contactPhoneInput.value.trim();
+      const mailingAddress = mailingAddressInput.value.trim();
       const invalidFields = [];
 
       fields.forEach((field) => field.classList.remove('field-error'));
@@ -159,10 +174,12 @@
       if (hasAllergy === '有' && !allergyDetail) invalidFields.push(allergyDetailInput);
       if (!needsLodging) invalidFields.push(lodgingSelect);
       if (needsLodging === '需要' && !lodgingDetail) invalidFields.push(lodgingDetailInput);
+      if (!/^\d{11}$/.test(contactPhone)) invalidFields.push(contactPhoneInput);
+      if (!mailingAddress) invalidFields.push(mailingAddressInput);
 
       if (invalidFields.length) {
         invalidFields.forEach((field) => field.classList.add('field-error'));
-        errorMsg.textContent = '请完整填写标红的问题。';
+        errorMsg.textContent = '请完整填写标红的问题，联系电话需为 11 位数字。';
         invalidFields[0].focus({ preventScroll: true });
         invalidFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
@@ -186,7 +203,9 @@
             hasDietaryNeed: hasAllergy,
             dietaryDetail: allergyDetail,
             needsLodging,
-            lodgingDetail
+            lodgingDetail,
+            contactPhone,
+            mailingAddress
           }),
           signal: controller.signal
         });

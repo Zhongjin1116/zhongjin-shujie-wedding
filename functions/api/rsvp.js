@@ -33,11 +33,17 @@ export async function onRequestPost(context) {
     hasDietaryNeed,
     dietaryDetail,
     needsLodging,
-    lodgingDetail
+    lodgingDetail,
+    contactPhone,
+    mailingAddress
   } = body;
 
-  if (!name || !hasCompanion || !hasDietaryNeed || !needsLodging) {
+  if (!name || !hasCompanion || !hasDietaryNeed || !needsLodging || !contactPhone || !mailingAddress) {
     return json({ error: 'Missing required fields' }, 400);
+  }
+
+  if (!/^\d{11}$/.test(contactPhone)) {
+    return json({ error: 'Invalid contact phone' }, 400);
   }
 
   if (hasCompanion === '有' && !companionNames) {
@@ -63,9 +69,11 @@ export async function onRequestPost(context) {
         dietary_detail,
         needs_lodging,
         lodging_detail,
+        contact_phone,
+        mailing_address,
         submitted_at
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         name.slice(0, 200),
@@ -76,6 +84,8 @@ export async function onRequestPost(context) {
         (dietaryDetail || '').slice(0, 500),
         needsLodging.slice(0, 20),
         (lodgingDetail || '').slice(0, 500),
+        contactPhone.slice(0, 20),
+        mailingAddress.slice(0, 1000),
         new Date().toISOString()
       )
       .run();

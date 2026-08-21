@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS rsvps (
   dietary_detail TEXT,
   needs_lodging TEXT NOT NULL DEFAULT '不需要',
   lodging_detail TEXT,
+  contact_phone TEXT NOT NULL,
+  mailing_address TEXT NOT NULL,
   submitted_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
