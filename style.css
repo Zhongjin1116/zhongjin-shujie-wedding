@@ -1050,6 +1050,11 @@ a { color: inherit; text-decoration: none; }
   text-decoration: none;
 }
 
+.rsvp-page.is-rsvp-submitted .rsvp-floating-back,
+.rsvp-page.is-rsvp-submitted .form-sub {
+  display: none;
+}
+
 .rsvp-main {
   max-width: 560px;
   margin: 0 auto;
@@ -1215,7 +1220,7 @@ a { color: inherit; text-decoration: none; }
 
 .success-container {
   text-align: center;
-  padding: 80px 0;
+  padding: 120px 0;
   animation: fadeUp 0.8s ease both;
 }
 
@@ -1226,10 +1231,12 @@ a { color: inherit; text-decoration: none; }
 }
 
 .success-heading {
-  font-family: var(--font-display);
-  font-style: italic;
+  font-family: var(--font-rsvp);
+  font-style: normal;
+  font-weight: 400;
   font-size: 30px;
-  margin-bottom: 14px;
+  color: inherit;
+  margin: 0;
 }
 
 .success-body {

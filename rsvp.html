@@ -74,10 +74,7 @@
 
       <!-- Success state -->
       <div id="success-container" style="display:none;" class="success-container">
-        <div class="success-icon">✦</div>
-        <h2 class="success-heading">感谢您的回复！</h2>
-        <p class="success-body">我们已收到您的回执，期待在婚礼上见到您。</p>
-        <a href="index.html?state=page3-rsvp" class="back-home-link">← 返回邀请函</a>
+        <h2 class="success-heading">回执已收到，我们婚礼见吧！</h2>
       </div>
     </div>
   </main>
@@ -179,6 +176,7 @@
         clearTimeout(timeoutId);
 
         if (res.ok) {
+          document.body.classList.add('is-rsvp-submitted');
           document.getElementById('form-container').style.display = 'none';
           document.getElementById('success-container').style.display = 'block';
         } else {
