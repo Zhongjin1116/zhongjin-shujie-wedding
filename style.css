@@ -192,11 +192,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page1-scene.is-exiting-to-page2 .page1-strawberry-left img,
-.page1-scene.is-exiting-to-page2 .page1-butterfly-left img,
 .page1-scene.is-exiting-to-page2 .page1-deer img,
 .page1-scene.is-exiting-to-page2 .page1-butterfly-center img,
 .page1-scene.is-page2 .page1-strawberry-left img,
-.page1-scene.is-page2 .page1-butterfly-left img,
 .page1-scene.is-page2 .page1-deer img,
 .page1-scene.is-page2 .page1-butterfly-center img,
 .page1-scene.is-entering-page3 .page1-strawberry-left img,
@@ -285,7 +283,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .page1-scene.is-page1-settled:not(.is-exiting-to-page2):not(.is-page2):not(.is-entering-page3):not(.is-returning-to-page1) .page1-sticker,
-.page1-scene.is-page3 .page1-sticker {
+.page1-scene.is-page3 .page1-sticker:not(.page1-butterfly-left) {
   opacity: 1;
   animation: none;
   transform: translate(0, 0) scale(1);
@@ -299,14 +297,6 @@ a { color: inherit; text-decoration: none; }
   opacity: 1;
   animation: none;
   transform: translate(0, 0) scale(1);
-}
-
-.page1-scene.is-exiting-to-page2 .page1-butterfly-left img,
-.page1-scene.is-page2 .page1-butterfly-left img,
-.page1-scene.is-entering-page3 .page1-butterfly-left img,
-.page1-scene.is-page3 .page1-butterfly-left img,
-.page1-scene.is-returning-to-page1 .page1-butterfly-left img {
-  animation: none;
 }
 
 .page1-fog-canvas {
