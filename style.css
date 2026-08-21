@@ -151,13 +151,6 @@ a { color: inherit; text-decoration: none; }
   animation: page1-butterfly-center-motion 2.5s linear infinite;
 }
 
-.page1-scene.is-exiting-to-page2 .page1-butterfly-left,
-.page1-scene.is-page2 .page1-butterfly-left {
-  opacity: 1;
-  animation: none;
-  transform: translate(0, 0) scale(1);
-}
-
 .page1-scene.is-exiting-to-page2 .page1-strawberry-left,
 .page1-scene.is-exiting-to-page2 .page1-deer,
 .page1-scene.is-exiting-to-page2 .page1-butterfly-center,
@@ -296,6 +289,24 @@ a { color: inherit; text-decoration: none; }
   opacity: 1;
   animation: none;
   transform: translate(0, 0) scale(1);
+}
+
+.page1-scene.is-exiting-to-page2 .page1-butterfly-left,
+.page1-scene.is-page2 .page1-butterfly-left,
+.page1-scene.is-entering-page3 .page1-butterfly-left,
+.page1-scene.is-page3 .page1-butterfly-left,
+.page1-scene.is-returning-to-page1 .page1-butterfly-left {
+  opacity: 1;
+  animation: none;
+  transform: translate(0, 0) scale(1);
+}
+
+.page1-scene.is-exiting-to-page2 .page1-butterfly-left img,
+.page1-scene.is-page2 .page1-butterfly-left img,
+.page1-scene.is-entering-page3 .page1-butterfly-left img,
+.page1-scene.is-page3 .page1-butterfly-left img,
+.page1-scene.is-returning-to-page1 .page1-butterfly-left img {
+  animation: none;
 }
 
 .page1-fog-canvas {
@@ -1107,12 +1118,12 @@ a { color: inherit; text-decoration: none; }
 
 .field-input::placeholder,
 .field-textarea::placeholder {
-  color: #7d766a;
+  color: #a8a49a;
   opacity: 1;
 }
 
 .field-select.is-empty {
-  color: #7d766a;
+  color: #a8a49a;
 }
 
 .field-select {
