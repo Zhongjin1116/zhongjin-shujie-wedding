@@ -1055,6 +1055,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .rsvp-page.is-rsvp-submitted .rsvp-floating-back,
+.rsvp-page.is-rsvp-submitted .form-heading,
 .rsvp-page.is-rsvp-submitted .form-sub {
   display: none;
 }
@@ -1279,7 +1280,7 @@ a { color: inherit; text-decoration: none; }
 .success-container {
   position: relative;
   text-align: center;
-  padding: 44px 0 0;
+  padding: 0;
   animation: fadeUp 0.8s ease both;
 }
 
