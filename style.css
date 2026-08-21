@@ -903,14 +903,14 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   pointer-events: none;
 }
 
 .page3-rsvp-link {
   position: absolute;
   left: 50%;
-  top: 66px;
+  top: 86px;
   z-index: 21;
   display: inline-block;
   min-width: 72px;
@@ -936,7 +936,7 @@ a { color: inherit; text-decoration: none; }
 .page3-rsvp-content small {
   position: absolute;
   left: 50%;
-  top: calc(var(--page3-card-height) * 0.29);
+  top: 122px;
   transform: translateX(-50%);
   font-size: 10px;
   line-height: 1;
