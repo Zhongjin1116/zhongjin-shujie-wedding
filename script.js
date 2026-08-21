@@ -173,7 +173,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }, true);
 
   pageControlButtons.forEach((button) => {
+    let lastControlTouchEnd = 0;
+
+    button.addEventListener('touchend', (event) => {
+      const now = Date.now();
+      if (now - lastControlTouchEnd < 360) {
+        event.preventDefault();
+      }
+      lastControlTouchEnd = now;
+    }, { passive: false });
+
+    button.addEventListener('dblclick', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
     button.addEventListener('click', (event) => {
+      event.preventDefault();
       event.stopPropagation();
       const action = button.dataset.controlAction;
 

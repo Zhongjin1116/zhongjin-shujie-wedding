@@ -330,6 +330,9 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 18px;
   transform: translateX(-50%);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .page1-controls {
@@ -356,7 +359,10 @@ a { color: inherit; text-decoration: none; }
   background: transparent;
   color: #fff;
   cursor: pointer;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .page-control img,
@@ -906,7 +912,7 @@ a { color: inherit; text-decoration: none; }
 .page3-rsvp-link {
   position: absolute;
   left: 50%;
-  top: 66px;
+  top: 54px;
   z-index: 21;
   display: inline-block;
   min-width: 72px;
