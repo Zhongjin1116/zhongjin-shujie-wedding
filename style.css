@@ -1220,7 +1220,7 @@ a { color: inherit; text-decoration: none; }
 
 .success-container {
   text-align: center;
-  padding: 120px 0;
+  padding: 80px 0;
   animation: fadeUp 0.8s ease both;
 }
 
@@ -1231,12 +1231,10 @@ a { color: inherit; text-decoration: none; }
 }
 
 .success-heading {
-  font-family: var(--font-rsvp);
-  font-style: normal;
-  font-weight: 400;
-  font-size: 30px;
-  color: inherit;
-  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 28px;
+  margin-bottom: 28px;
 }
 
 .success-body {
